@@ -1,0 +1,221 @@
+###################################################
+# +---------------------------------------------+ #
+# |             Database Connection             | #
+# +---------------------------------------------+ #
+###################################################
+
+# CAUTION! Developer mode will drop all database tables on startup. DO NOT USE IN PRODUCTION.
+developer-mode: false
+
+# Database connection settings.
+mysql:
+  host: localhost
+  port: 3306
+  username: unitedwars
+  password: unitedwars
+  database: unitedwars
+
+###################################################
+# +---------------------------------------------+ #
+# |                War Scheduler                | #
+# +---------------------------------------------+ #
+###################################################
+
+warscheduler:
+  check-interval: 15 # in seconds
+
+###################################################
+# +---------------------------------------------+ #
+# |                 War Settings                | #
+# +---------------------------------------------+ #
+###################################################
+
+# Ignore these worlds for pvp scoring
+world-blacklist:
+  - world_arena1
+  - world_arena2
+  - world_arena3
+
+# Duration of war immunity for towns that come out of a defensice war
+war-immunity-duration: 10080 # in minutes
+
+# Settings for different war goals
+war-goal-settings:
+  skirmish:
+    description: "A small-scale fight between two settlements. The winning settlement will take the war chest."
+    end-messages:
+      DRAW: "The war ended without a clear winner. All war contributions have been returned."
+      ATTACKER: "The attackers are victorius and have taken the war chest."
+      DEFENDER: "The defenders have repelled the attack and taken the war chest."
+    required-rank: mayor
+    warmup-time: 86400 # in seconds
+    duration: 259200 # in seconds
+    cost: 30 # mobilisation points
+    war-lives: 5
+    max-attacker-mercenaries: 5
+    max-defender-mercenaries: 5
+    scorecaps:
+      attacker: 10000
+      defender: 10000
+  revolt:
+    description: "A settlememt revolting against their country. If the rebels win, the region and all towns in it will cede from the country."
+    end-messages:
+      DRAW: "The war ended without a clear winner. The status quo has been restored."
+      ATTACKER: "The rebels have won the day! Their region has gained independence."
+      DEFENDER: "The rebels were defeated. The region remains under country control."
+    required-rank: mayor
+    warmup-time: 86400 # in seconds
+    duration: 259200 # in seconds
+    cost: 30 # mobilisation points
+    war-lives: 5
+    max-attacker-mercenaries: 5
+    max-defender-mercenaries: 5
+    scorecaps:
+      attacker: 30000
+      defender: 30000
+  claim_dispute:
+    description: "Two or more countries fighting to claim a region. The winning faction will take control."
+    end-messages:
+      DRAW: "The war ended without a clear winner. The region remains uncontrolled."
+      RIVAL: "The winning faction has seized control of the region."
+    required-rank: leader
+    warmup-time: 86400 # in seconds
+    duration: 259200 # in seconds
+    cost: 10 # mobilisation points
+    war-lives: 5
+    max-attacker-mercenaries: 5
+    max-defender-mercenaries: 5
+    scorecaps:
+      claimant: 30000
+  conquest:
+    description: "A full conquest war. The winning faction's leader will take control of the region and it settlements."
+    end-messages:
+      DRAW: "The war ended without a clear winner. All war contributions have been returned."
+      ATTACKER: "The attackers are victorius and have taken the target region."
+      DEFENDER: "The defenders have repelled the attack. The region remains in their control."
+    required-rank: leader
+    warmup-time: 10 # in seconds
+    duration: 259200 # in seconds
+    cost: 30 # mobilisation points
+    war-lives: 5
+    max-attacker-mercenaries: 5
+    max-defender-mercenaries: 5
+    scorecaps:
+      attacker: 40000
+      defender: 40000
+  subjugation:
+    description: "A war to force a settlement into a country. If the attackers win, the settlement will become part of their realm."
+    end-messages:
+      DRAW: "The war ended without a clear winner. All war contributions have been returned."
+      ATTACKER: "The attackers are victorius and have taken the settlement."
+      DEFENDER: "The defenders have repelled the attack. The settlement remains free."
+    required-rank: leader
+    warmup-time: 10 # in seconds
+    duration: 259200 # in seconds
+    cost: 30 # mobilisation points
+    war-lives: 5
+    max-attacker-mercenaries: 5
+    max-defender-mercenaries: 5
+    scorecaps:
+      attacker: 15000
+      defender: 15000
+
+military-ranks:
+  default: # civilian rank, players with no assigned military towny rank
+    score-multiplier: 0.0
+    level: town
+    unique: false
+  militia:
+    score-multiplier: 0.9
+    level: town
+    unique: false
+  soldier:
+    score-multiplier: 1.0
+    level: town
+    unique: false
+  officer:
+    score-multiplier: 1.1
+    level: town
+    unique: false
+  general:
+    level: nation
+    score-multiplier: 1.2
+    unique: true
+
+siege-settings:
+  # Optional visual markers shown on Pl3xmap at the location of capture chunks during wars
+  capture-markers: 
+    use: true
+    layer-key: "unitedwars"
+    layer-name: "Wars"
+    marker: "siege"
+
+  # number of schematics to randomly pick from when placing war camps. Set to 0 to disable placement.
+  warcamp-templates: 5
+  # If true, sieges and griefing will always be active regardless of whether players of a particular
+  # war side are online or not
+  override-activity-requirement: false
+  # If sieging from the border is required, players can only start capturing chunks that are
+  # either adjacent to wilderness, or adjacent to already occupied chunks
+  require-siege-from-border: true
+  # If true, the health decay and restoration is applied per player in the majority:
+  # 5 attackers vs. 2 defenders = 3 player majority for attackers = 3 * health decay rate per war tick
+  # If false, the health decay and restoration only apply once per team in the majority
+  use-superiority-multiplier: true
+  # The starting HP of chunks at the beginning of a war (relative to max health)
+  health-start-percentage: 1.0
+  # The amount of HP a chunk loses when the attackers are in a majority
+  health-decay-rate: 1
+  # The amount of HP a chunk heals when the defenders are in a majority
+  health-restore-rate: 1
+  # Initial max health points for chunk types
+  chunk-max-health:
+    default: 3
+    home: 50
+    region-home: 500
+    warcamp: 100
+    fortress: 250
+  # Commands that players can't use while sieges are ongoing (i.e. enemies are online)
+  disabled-commands:
+    - "rtp"
+    - "tfly"
+    - "pwarp"
+    - "warp"
+    - "ud warp"
+
+###################################################
+# +---------------------------------------------+ #
+# |               Score settings                | #
+# +---------------------------------------------+ #
+###################################################
+
+score-settings:
+  activity: 1
+  pvp-kill:
+    leader-kill-bonus-multiplier: 1.5
+    rank-scores:
+      default: 0
+      militia: 10
+      soldier: 100
+      officer: 200
+      general: 500
+  chunk-capture:
+    default: 10
+    home: 500
+    region-home: 500
+    warcamp: 250
+    fortress: 250
+
+notification-settings:
+  ACTIVITY:
+    silent: true
+    message: score-activity
+  PVP_KILL:
+    silent: false
+    message: score-pvp-kill
+  PVP_KILL_LEADER:
+    silent: false
+    message: score-pvp-kill-leader
+  SIEGE_CHUNK_CAPTURE:
+    silent: false
+    message: score-siege-capture-default

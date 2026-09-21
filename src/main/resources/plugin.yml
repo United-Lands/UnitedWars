@@ -1,0 +1,15 @@
+name: UnitedWars
+version: 0.0.1
+main: org.unitedlands.wars.UnitedWars
+api-version: 1.21
+description: Project description
+author: Theriel_
+depend: [UnitedLib, UnitedLands]
+softdepend: [LuckPerms]
+commands:
+  unitedwarsadmin:
+    description: UnitedWars admin commands.
+    permission: united.wars.admin
+    aliases: [wa]
+  war:
+    description: UnitedWars main commands.

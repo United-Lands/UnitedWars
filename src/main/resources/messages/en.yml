@@ -1,0 +1,100 @@
+prefix: "<bold><red>U</red><white>L</white> Wars<dark_gray>» </dark_gray></bold>"
+reload: "<dark_green>Plugin reloaded.</dark_green>"
+
+errors:
+  generic: "<red>Could nor execute the request. Check the console for details.</red>"
+  invalid-war-goal: "<red>Invalid War Goal: {1}</red>"
+  object-not-found: "<red>Could not find object {1}.</red>"
+
+admin:
+  war:
+    create:
+      usage: "/wa create <war_goal> <attacker> <target> [title] [description]"
+
+player:
+  war:
+    book:
+      usage: "/war book <war_goal> [target]"
+      unknown-war-goal: "<yellow>Unkown war goal: {1}.</yellow>"
+      validation-error: "<yellow>Can't create war book: {1}</yellow>"
+      not-in-settlement: "<yellow>You are not part of a settlement.</yellow>"
+      not-in-country: "<yellow>You are not part of a country.</yellow>"
+      no-rank: "<yellow>You don't have the required settlement or country rank to to this.</yellow>"
+      no-region: "<yellow>Your settlement is not in a region.</yellow>"
+      target-invalid: "<yellow>Target {1} not valid for this war goal.</yellow>"
+
+
+# +---------------------------------------------+ #
+# |               War Messages                  | #
+# +---------------------------------------------+ #
+
+info-screens:
+  war-declared:
+    decription: "<gray>{1}</gray>"
+    war-goal: "<gray><white><bold>{1}</bold></white>: {2}</gray>"
+    faction-header: "<white><bold>Factions in this war:</bold></white>"
+    faction-entry: "<gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3}</gray>"
+    faction-win-conditions-header: "<white><bold>They <green>win</green> if one of the following is true:</bold></white>"
+    faction-win-conditions-entry: "<gray>- {1} {2}</gray>"
+    faction-lose-conditions-header: "<white><bold>They <red>lose</red> if one of the following is true:</bold></white>"
+    faction-lose-conditions-entry: "<gray>- {1} {2}</gray>"
+    war-chest: "<gray><white><bold>Factions in this war:</bold></white></gray>"
+    timer-info: "<gray><white><bold>This war will start in:</bold></white> {1}</gray>"
+  war-info:
+    decription: "<gray>{1}</gray>"
+    war-goal: "<gray><white><bold>{1}</bold></white>: {2}</gray>"
+    faction-header: "<white><bold>Factions in this war:</bold></white>"
+    faction-entry: "<gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3}</gray>"
+    faction-win-conditions-header: "<white><bold>They <green>win</green> if one of the following is true:</bold></white>"
+    faction-win-conditions-entry: "<gray>- {1} {2}</gray>"
+    faction-lose-conditions-header: "<white><bold>They <red>lose</red> if one of the following is true:</bold></white>"
+    faction-lose-conditions-entry: "<gray>- {1} {2}</gray>"
+    war-chest: "<gray><white><bold>Factions in this war:</bold></white></gray>"
+    timer-info: "<gray><white><bold>This war will end in:</bold></white> {1}</gray>"
+  war-end:
+    info: "<gray>The war has ended with the following result:</gray>"
+    draw: "<white><bold>DRAW</bold></white>"
+    winner: "<white><bold>Winning faction: </bold></white> {1} ({2})"
+    win-condition: "<white><bold>Winning condition: </bold></white> {1}"
+
+chunk-captured: "<gold>A chunk in the town of <yellow>{1} ({2}) <gold>has been captured!"
+town-captured: "<gold><bold>{1}<reset><white>: The town of {2} succumbed to the siege of the attacking armies and was captured!"
+resident-nation-joined-war: "<aqua>Your nation has joined the war!"
+war-call-send-success: "<aqua>Call to War sent to ally. The call will automatically expire in 5 minutes."
+war-call-receive: "<aqua>You received a Call to War. Use /t war acceptcall <war_name> to accept. The call will automatically expire in 5 minutes."
+war-declare-usage: "Usage: /t war declare"
+add-mercenary-success: "<aqua>{1} has been added as a mercenary for your side."
+resident-mercenary-join-success: "<aqua>You've been added as a mercenary on the {1} side of {2}"
+mercenary-remove-success: "<aqua>{1} has been removed as a mercenary for your side."
+mercenary-resident-removed-success: "<yellow>You've been removed as a mercenary on the {1} side of {2}"
+mercenary-invite-sent: "<aqua>Invitation sent to {1}. It will automatically expire in 5 minutes."
+mercenary-invite-received: '<aqua>You''ve received an invitation to join as a mercenary for the {1} side of {2}. Use "/t war acceptinvite <warname>" to accept.'
+war-call-ally-send-success: "<aqua>Call to War sent to ally. The call will automatically expire in 5 minutes."
+warning-warzone: "<yellow>WARNING: You have teleported to an active war zone. <red>You may lose your inventory when getting killed in this area."
+
+
+# +---------------------------------------------+ #
+# |                  Scores                     | #
+# +---------------------------------------------+ #
+
+score-default: "<gray>You scored <white><bold>{1}."
+score-activity: "<gray>You scored <white><bold>{1} points for being online."
+score-pvp-kill: "<gray>You scored <white><bold>{1} points <gray><reset>for killing an enemy!"
+score-pvp-kill-leader: "<gray>You scored <white><bold>{1} points <gray><reset>for killing an enemy leader!"
+score-siege-capture-default: "<gray>Your team received <white><bold>{1} points <gray><reset>for capturing a chunk!"
+score-siege-capture-occupation: "<gray>Your team received <white><bold>{1} points <gray><reset>for bringing down an enemy home chunk!"
+
+# +---------------------------------------------+ #
+# |                  War Books                  | #
+# +---------------------------------------------+ #
+
+war-book-created: "<aqua>You have created a war declaration book. Edit it to add your reasons for the war. The name of the signed book will be the name of the war. If you wish to set a longer war name, rename this book at an anvil after signing."
+war-book-name: "Unnamed War"
+war-book-content: "Replace this page with a brief description of your war reasons.\n\n"
+war-book-lore:
+  - ""
+  - "<yellow>Rename <gray>this book at an anvil"
+  - "<gray>to set the name of the war."
+  - "<yellow>Right-click <gray>this book to write"
+  - "<gray>your reasoning behind the <yellow>war."
+  - ""
