@@ -6,7 +6,7 @@ public class ReachScoreCondition extends WarCondition {
 
     public ReachScoreCondition() {
         this.id = "reach_score";
-        this.description = "They reach the required score";
+        this.description = "Reach score";
     }
 
     @Override

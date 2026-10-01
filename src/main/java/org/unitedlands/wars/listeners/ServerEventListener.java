@@ -13,7 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.managers.WarManager;
-import org.unitedlands.wars.managers.WarMetaDataManager;
 import org.unitedlands.wars.schedulers.WarScheduler;
 import org.unitedlands.wars.utils.WarBookUtils;
 
@@ -32,8 +31,7 @@ public class ServerEventListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        WarMetaDataManager.instance().validateWarLivesMetaData(event.getPlayer());
-        WarMetaDataManager.instance().validateFactionPermissions(event.getPlayer());
+        WarManager.instance().validateMetaData(event.getPlayer());
         if (!WarManager.instance().anyWarsPending() && !WarManager.instance().anyWarsActive())
             return;
         WarManager.instance().updatePlayerLists();
@@ -50,6 +48,7 @@ public class ServerEventListener implements Listener {
         }, 1);
     }
 
+    // Workaround for book signing
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBookEdit(PlayerEditBookEvent event) {
 

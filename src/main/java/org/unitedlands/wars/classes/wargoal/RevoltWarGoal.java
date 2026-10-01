@@ -20,7 +20,6 @@ public class RevoltWarGoal extends WarGoal {
 
     public RevoltWarGoal() {
         super("revolt");
-        this.description = UnitedWars.instance().getConfig().getString("war-goal-settings.revolt.description");
     }
 
     @Override
@@ -153,7 +152,7 @@ public class RevoltWarGoal extends WarGoal {
 
             var country = region.getCountry();
 
-            if (!war.getWinningFaction().equals(attackerFactions.getFirst())) {
+            if (war.getWinningFaction() == null || !war.getWinningFaction().equals(attackerFactions.getFirst())) {
                 // The revolt has failed. Force the settlement back into the nation and apply
                 // cooldowns.
                 // TODO Cooldowns

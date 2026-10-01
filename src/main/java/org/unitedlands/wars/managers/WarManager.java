@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.unitedlands.unitedlands.classes.Citizen;
 import org.unitedlands.unitedlands.classes.Coordinates;
@@ -65,7 +66,7 @@ public class WarManager {
     private void initializeWarGoals() {
         warGoals.put("skirmish", new SkirmishWarGoal());
         warGoals.put("revolt", new RevoltWarGoal());
-        warGoals.put("claim_dispute", new ClaimDisputeWarGoal());
+        warGoals.put("claim-dispute", new ClaimDisputeWarGoal());
         warGoals.put("conquest", new ConquestWarGoal());
         warGoals.put("subjugation", new SubjugationWarGoal());
     }
@@ -274,6 +275,10 @@ public class WarManager {
 
     public void endWar(War war) {
 
+        war.setActive(false);
+        war.setEnded(true);
+        war.setEffectiveEndTime(System.currentTimeMillis());
+
         war.resolveWarGoal();
 
         SiegeManager.instance().cleanupSiegeChunks(war);
@@ -290,13 +295,14 @@ public class WarManager {
             warZone.restoreGriefZone();
         }
 
-        war.setActive(false);
-        war.setEnded(true);
-        war.setEffectiveEndTime(System.currentTimeMillis());
-
         activeWars.remove(war.getUuid());
+        pendingWars.remove(war.getUuid());
 
         databaseManager.getWarService().updateAsync(war);
+
+        for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
+            validateMetaData(onlinePlayer);
+        }
 
         (new WarEndEvent(war)).callEvent();
     }
@@ -307,6 +313,11 @@ public class WarManager {
 
     public boolean anyWarsActive() {
         return activeWars.size() > 0;
+    }
+
+    public void validateMetaData(Player player) {
+        WarMetaDataManager.instance().validateWarLivesMetaData(player);
+        WarMetaDataManager.instance().validateFactionPermissions(player);
     }
 
     public void updatePlayerLists() {
@@ -365,8 +376,18 @@ public class WarManager {
         return warConditions.get(id);
     }
 
+    public Collection<War> getWars() {
+        var allWars = new ArrayList<>(activeWars.values());
+        allWars.addAll(pendingWars.values());
+        return allWars;
+    }
+
     public Collection<War> getActiveWars() {
         return activeWars.values();
+    }
+
+    public Collection<War> getPendingWars() {
+        return pendingWars.values();
     }
 
     public War getWar(UUID id) {
@@ -442,6 +463,10 @@ public class WarManager {
                 return warZone;
         }
         return null;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
     }
 
 }

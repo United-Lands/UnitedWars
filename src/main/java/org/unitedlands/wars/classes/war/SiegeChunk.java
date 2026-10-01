@@ -10,7 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.unitedlands.classes.db.Identifiable;
-import org.unitedlands.unitedlands.libs.ormlite.field.DatabaseField;
+import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.warzone.WarZone;

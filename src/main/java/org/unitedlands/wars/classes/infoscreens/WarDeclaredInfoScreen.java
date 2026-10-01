@@ -1,78 +1,59 @@
 package org.unitedlands.wars.classes.infoscreens;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.bukkit.plugin.Plugin;
-import org.unitedlands.interfaces.IMessageProvider;
-import org.unitedlands.unitedlands.classes.infoscreen.InfoScreen;
+import org.unitedlands.utils.United;
+import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.war.War;
-import org.unitedlands.wars.managers.WarManager;
 
-public class WarDeclaredInfoScreen extends InfoScreen {
+public class WarDeclaredInfoScreen extends UnitedWarInfoScreen {
 
-    public WarDeclaredInfoScreen(Plugin plugin, IMessageProvider messageProvider, War war) {
+    public WarDeclaredInfoScreen(War war) {
         super();
-
-        var msgs = messageProvider.getSection("info-screens.war-declared");
-
         // Reuse the Unitedlands header style for consistency
         var header = buildHeader(war.getCleanTitle());
         addComponent("header", header);
 
-        var warReplacements = war.getMessageReplacements();
+        var warGoal= war.getWarGoal();
+        var warGoalId = warGoal.getId();
 
-        addComponent("description", msgs.get("decription"), warReplacements);
-        addComponent("wargoal", msgs.get("war-goal"), warReplacements);
+        addComponent("wargoal", "war-goals." + warGoalId + ".display-name", UnitedWars.instance());
+        addComponent("wargoal-description", "war-goals." + warGoalId + ".description", UnitedWars.instance(), getTargetName(war));
 
-        addComponent("factionHeader", msgs.get("faction-header"), Map.of());
+        addComponent("custom-decription", "info-screens.war-declared.custom-decription", UnitedWars.instance(), war.getDescription());
+
+        // addComponent("description", "war-goals." + warGoalId + ".description", UnitedWars.instance());
+        // addComponent("win", "war-goals." + warGoalId + ".win", UnitedWars.instance());
+        
+        // addComponent("factionHeader", "info-screens.war-declared.faction-header", UnitedWars.instance());
+
 
         var factionCounter = 1;
         for (var faction : war.getWarFactions()) {
 
-            var factionReplacements = faction.getMessageReplacements();
-            addComponent("faction" + factionCounter, msgs.get("faction-entry"), factionReplacements);
-
-            addComponent("win-conditions", msgs.get("faction-win-conditions-header"), Map.of());
-            
-            var winConditionCounter = 1;
-            for (var entry : faction.getWinConditions().entrySet()) {
-
-                var condition = WarManager.instance().getWarCondition(entry.getKey());
-                var conditionReplacements = new HashMap<>(condition.getMessageReplacements());
-                conditionReplacements.put(
-                        "condition-value",
-                        entry.getValue() != null ? "(" + String.valueOf(entry.getValue()) + ")" : "");
-
-                addComponent("faction" + factionCounter + "-win-condition-entry" + winConditionCounter,
-                        msgs.get("faction-win-conditions-entry"),
-                        conditionReplacements);
-
-                winConditionCounter++;
-            }
-
-            addComponent("lose-conditions", msgs.get("faction-lose-conditions-header"), Map.of());
-
-            var loseConditionCounter = 1;
-            for (var entry : faction.getLoseConditions().entrySet()) {
-
-                var condition = WarManager.instance().getWarCondition(entry.getKey());
-                var conditionReplacements = new HashMap<>(condition.getMessageReplacements());
-                conditionReplacements.put(
-                        "condition-value",
-                        entry.getValue() != null ? "(" + String.valueOf(entry.getValue()) + ")" : "");
-
-                addComponent("faction" + factionCounter + "-lose-condition-entry" + loseConditionCounter,
-                        msgs.get("faction-lose-conditions-entry"),
-                        conditionReplacements);
-
-                loseConditionCounter++;
+            var scoreCap = faction.getWinConditions().get("reach_score");
+            if (scoreCap != null)
+            {
+                addComponent("faction" + factionCounter, 
+                    "info-screens.war-declared.faction-entry-maxscore", 
+                    UnitedWars.instance(), 
+                    faction.getColoredCleanName(),
+                    faction.getRole().toString(),
+                    String.valueOf(faction.getScore()),
+                    String.valueOf(scoreCap)
+                );
+            } else {
+                addComponent("faction" + factionCounter, 
+                    "info-screens.war-declared.faction-entry", 
+                    UnitedWars.instance(), 
+                    faction.getColoredCleanName(),
+                    faction.getRole().toString(),
+                    String.valueOf(faction.getScore())
+                );
             }
 
             factionCounter++;
         }
 
-        addComponent("timer-info", msgs.get("timer-info"), warReplacements);
+        addComponent("timer", "info-screens.war-declared.timer-info", UnitedWars.instance(), United.formatter().formatDuration(war.getScheduledBeginTime() - System.currentTimeMillis()));
 
     }
 

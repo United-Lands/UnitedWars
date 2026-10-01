@@ -1,8 +1,7 @@
-prefix: "<bold><red>U</red><white>L</white> Wars<dark_gray>» </dark_gray></bold>"
 reload: "<dark_green>Plugin reloaded.</dark_green>"
 
 errors:
-  generic: "<red>Could nor execute the request. Check the console for details.</red>"
+  generic: "<red>Could not execute the request. Check the console for details.</red>"
   invalid-war-goal: "<red>Invalid War Goal: {1}</red>"
   object-not-found: "<red>Could not find object {1}.</red>"
 
@@ -23,6 +22,43 @@ player:
       no-region: "<yellow>Your settlement is not in a region.</yellow>"
       target-invalid: "<yellow>Target {1} not valid for this war goal.</yellow>"
 
+# +---------------------------------------------+ #
+# |               War Goals                     | #
+# +---------------------------------------------+ #
+
+war-goals:
+  claim-dispute:
+    display-name: "<b>Claim Dispute</b>"
+    description: "<gray>Two or more countries fighting over an unclaimed region.</gray>"
+    win: "<b>Win Conditions</b>:<br>All claimants: Conquer the region home chunk."
+    reward: "<b>Rewards</b>:<br>Winning claimant: Gains control of the region."
+    end-messages:
+      DRAW: "The war ended without a clear winner. The region remains uncontrolled."
+      RIVAL: "The winning faction has seized control of the region."
+  conquest:
+    display-name: "Conquest"
+    description: "<gray>The attackers have declared war to take <b>{1}</b>. Defenders may attempt a counterattack in the closest enemy region.</gray><br>"
+    end-messages:
+      DRAW: "The war ended without a clear winner. All war contributions have been returned."
+      ATTACKER: "The attackers are victorius and have taken the target region."
+      DEFENDER: "The defenders have repelled the attack. The region remains in their control."
+  revolt:
+    display-name: "Revolt"
+    description: "One or more settlements revolting against their country."
+    win: "Rebels: Conquer the region home chunk and hold your settlements. Loyalists: Conquer all revolting settlements."
+    reward: "Rebels: The region and all settlements will become uncontrolled."
+    end-messages:
+      DRAW: "The war ended without a clear winner. The status quo has been restored."
+      ATTACKER: "The rebels have won the day! Their region has gained independence."
+      DEFENDER: "The rebels were defeated. The region remains under country control."
+  subjugation:
+    display-name: "Subjugation"
+    description: "A war to force a settlement into a country."
+    win: "Attacker: Conquer the settlement and defend against counterattacks. Defender: protect the settlement and conquer the enemy's closest region."
+    end-messages:
+      DRAW: "The war ended without a clear winner. All war contributions have been returned."
+      ATTACKER: "The attackers are victorius and have taken the settlement."
+      DEFENDER: "The defenders have repelled the attack. The settlement remains free."
 
 # +---------------------------------------------+ #
 # |               War Messages                  | #
@@ -54,7 +90,7 @@ info-screens:
   war-end:
     info: "<gray>The war has ended with the following result:</gray>"
     draw: "<white><bold>DRAW</bold></white>"
-    winner: "<white><bold>Winning faction: </bold></white> {1} ({2})"
+    winner: "<white><bold>Winner: </bold></white> {1} ({2})"
     win-condition: "<white><bold>Winning condition: </bold></white> {1}"
 
 chunk-captured: "<gold>A chunk in the town of <yellow>{1} ({2}) <gold>has been captured!"
@@ -89,12 +125,3 @@ score-siege-capture-occupation: "<gray>Your team received <white><bold>{1} point
 # +---------------------------------------------+ #
 
 war-book-created: "<aqua>You have created a war declaration book. Edit it to add your reasons for the war. The name of the signed book will be the name of the war. If you wish to set a longer war name, rename this book at an anvil after signing."
-war-book-name: "Unnamed War"
-war-book-content: "Replace this page with a brief description of your war reasons.\n\n"
-war-book-lore:
-  - ""
-  - "<yellow>Rename <gray>this book at an anvil"
-  - "<gray>to set the name of the war."
-  - "<yellow>Right-click <gray>this book to write"
-  - "<gray>your reasoning behind the <yellow>war."
-  - ""

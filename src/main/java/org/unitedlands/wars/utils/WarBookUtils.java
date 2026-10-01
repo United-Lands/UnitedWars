@@ -29,16 +29,16 @@ public class WarBookUtils {
 
         if (book.getItemMeta() instanceof BookMeta bookMeta) {
 
-            var bookContent = UnitedWars.instance().getMessageProvider().get("war-book-content");
+            var bookContent = UnitedWars.instance().getConfig().getString("war-book-content");
             bookMeta.addPages(MiniMessage.miniMessage().deserialize(bookContent));
 
             bookMeta.addEnchant(Enchantment.LURE, 1, false);
             bookMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
-            var bookName = UnitedWars.instance().getMessageProvider().get("war-book-name");
+            var bookName = UnitedWars.instance().getConfig().getString("war-book-name");
             bookMeta.displayName(MiniMessage.miniMessage().deserialize(bookName));
 
-            var bookLore = UnitedWars.instance().getMessageProvider().getList("war-book-lore");
+            var bookLore = UnitedWars.instance().getConfig().getStringList("war-book-lore");
             List<Component> bookLoreComponents = new ArrayList<>(bookLore.size());
             for (String line : bookLore) {
                 Component component = MiniMessage.miniMessage().deserialize(line);

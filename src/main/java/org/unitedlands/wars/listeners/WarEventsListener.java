@@ -9,20 +9,14 @@ import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.infoscreens.WarDeclaredInfoScreen;
 import org.unitedlands.wars.classes.infoscreens.WarEndInfoScreen;
+import org.unitedlands.wars.classes.infoscreens.WarStartInfoScreen;
 import org.unitedlands.wars.events.WarEndEvent;
 import org.unitedlands.wars.events.WarPreRegisterEvent;
 import org.unitedlands.wars.events.WarRegisteredEvent;
 import org.unitedlands.wars.events.WarScoreEvent;
 import org.unitedlands.wars.events.WarStartEvent;
-import org.unitedlands.wars.utils.MessageProvider;
 
 public class WarEventsListener implements Listener {
-
-    private final MessageProvider messageProvider;
-
-    public WarEventsListener(MessageProvider messageProvider) {
-        this.messageProvider = messageProvider;
-    }
 
     @EventHandler
     public void OnWarPreRegister(WarPreRegisterEvent event) {
@@ -35,7 +29,7 @@ public class WarEventsListener implements Listener {
             player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_6, 1.0f, 1.0f);
         }
 
-        var warDeclaredScreen = new WarDeclaredInfoScreen(UnitedWars.instance(), messageProvider, event.getWar());
+        var warDeclaredScreen = new WarDeclaredInfoScreen(event.getWar());
         warDeclaredScreen.send(Bukkit.getServer());
     }
 
@@ -44,7 +38,9 @@ public class WarEventsListener implements Listener {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_7, 1.0f, 1.0f);
         }
-        United.messenger().broadcast("war-started", event.getWar().getTitle());
+
+        var warStartScreen = new WarStartInfoScreen(event.getWar());
+        warStartScreen.send(Bukkit.getServer());
     }
 
     @EventHandler
@@ -53,7 +49,7 @@ public class WarEventsListener implements Listener {
             player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_2, 1.0f, 1.0f);
         }
 
-        var warEndScreen = new WarEndInfoScreen(UnitedWars.instance(), messageProvider, event.getWar());
+        var warEndScreen = new WarEndInfoScreen(event.getWar());
         warEndScreen.send(Bukkit.getServer());
     }
 

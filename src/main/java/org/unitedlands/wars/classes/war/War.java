@@ -16,8 +16,8 @@ import org.unitedlands.unitedlands.classes.Citizen;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.db.Identifiable;
-import org.unitedlands.unitedlands.libs.ormlite.field.DataType;
-import org.unitedlands.unitedlands.libs.ormlite.field.DatabaseField;
+import org.unitedlands.libs.ormlite.field.DataType;
+import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.unitedlands.utils.CoordinateUtils;
 import org.unitedlands.unitedlands.utils.SerializationUtils;
@@ -390,10 +390,13 @@ public class War implements Identifiable {
             }
         }
 
-        if (winners.size() == 1 && winningConditions.size() == 1) {
+        if (winners.size() == 1) {
             // Exactly one faction won
             setWinningFaction(winners.get(0));
-            setWinningCondition(winningConditions.get(0));
+            // Set winning condition, if one was met. If there is none, they won by highest score.
+            if (winningConditions.size() != 0) {
+                setWinningCondition(winningConditions.get(0));
+            }
             return true;
         } else if (winners.size() > 1) {
             // Multiple simultaneous winners. End the war, but don't declare a winning

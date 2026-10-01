@@ -8,7 +8,7 @@ public class OwnMinimumWarZonesCondition extends WarCondition {
 
     public OwnMinimumWarZonesCondition() {
         this.id = "own_minimum_war_zones";
-        this.description = "They own at least the required number of war zones";
+        this.description = "Own minimum war zones";
     }
 
     @Override

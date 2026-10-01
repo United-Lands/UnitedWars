@@ -1,8 +1,12 @@
 package org.unitedlands.wars.listeners;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.unitedlands.unitedlands.classes.events.base.PlayerChangeChunkEvent;
+import org.unitedlands.unitedlands.classes.events.country.CountryPreRemoveEvent;
 import org.unitedlands.unitedlands.classes.events.player.PlayerEnterSettlementEvent;
 import org.unitedlands.unitedlands.classes.events.region.RegionClaimStartEvent;
 import org.unitedlands.unitedlands.classes.events.region.RegionDoubleClaimEvent;
@@ -31,19 +35,18 @@ public class UnitedLandsListener implements Listener {
         if (!WarManager.instance().anyWarsActive())
             return;
 
-        if (!WarManager.instance().isChunkInWarZone(event.getFromCoordinates())
-                && !WarManager.instance().isChunkInWarZone(event.getToCoordinates()))
+        if (!WarManager.instance().isChunkInWarZone(event.getFromCoordinates()) && !WarManager.instance().isChunkInWarZone(event.getToCoordinates()))
             return;
 
-        SiegeManager.instance().updatePlayersInChunk(event.getPlayer(), event.getFromCoordinates(),
-                event.getToCoordinates());
+        SiegeManager.instance().updatePlayersInChunk(event.getPlayer(), event.getFromCoordinates(), event.getToCoordinates());
     }
 
     @EventHandler(ignoreCancelled = false)
     public void onDoubleClaim(RegionDoubleClaimEvent event) {
-        // event.setConfirmationMessage(
-        //         "<red>This region is already being claimed. If you approve this claim, you will trigger a war with the claiming country. Continue?</red>");
-        // event.setCancelled(false);
+        // TODO: Move string to config
+        event.setConfirmationMessage(
+                "<red>This region is already being claimed. If you approve this claim, you will trigger a war with the claiming country. Continue?</red>");
+        event.setCancelled(false);
     }
 
     @EventHandler(ignoreCancelled = false)
@@ -63,10 +66,10 @@ public class UnitedLandsListener implements Listener {
                 return;
             }
 
-            var warGoal = WarManager.instance().getWarGoal("claim_dispute");
-            var title = "Claim Dispute: " + region.getCleanName();
-            var description = attackingCountry.getCleanName() + " is fighting " + targetCountry.getCleanName()
-                    + " over control of " + region.getCleanName() + ".";
+            var warGoal = WarManager.instance().getWarGoal("claim-dispute");
+            var title = "Claim_Dispute_" + region.getName();
+            var description = attackingCountry.getCleanName() + " is fighting " + targetCountry.getCleanName() + " over control of " + region.getCleanName()
+                    + ".";
 
             War war = War.create(warGoal, attackingCountry, region, title, description);
             if (war == null) {
@@ -83,6 +86,44 @@ public class UnitedLandsListener implements Listener {
             WarManager.instance().registerWar(war);
         }
 
+    }
+
+    public void onCountryPreRemove(CountryPreRemoveEvent event) {
+
+        var country = event.getCountry();
+
+        // If a country gets removed by UnitedLands (e.g. by manual deletion, upkeep,
+        // lost wars etc.), iterate all wars to see if the country is part of it, and
+        // act accordingly
+
+        List<War> warsToEnd = new ArrayList<>();
+        for (var war : WarManager.instance().getWars()) {
+
+            // The event might have been caused by a war that has just ended. Ignore.
+            if (war.hasEnded())
+                continue;
+
+            for (var faction : war.getWarFactions()) {
+                if (faction.getFactionLeaderId().equals(country.getUuid())) {
+                    // Loss of the faction leader means immediate end of the war
+                    warsToEnd.add(war);
+                } else {
+                    // Remove country from faction
+                    if (faction.hasCountry(country)) {
+                        faction.removeCountry(country);
+                    }
+                    // If no other faction members remain, end the war
+                    if (faction.getCountries().size() == 0 && faction.getSettlements().size() == 0) {
+                        warsToEnd.add(war);
+                    }
+                }
+            }
+
+            for (var warToEnd : warsToEnd) {
+                WarManager.instance().endWar(warToEnd);
+            }
+
+        }
     }
 
 }

@@ -3,9 +3,7 @@ package org.unitedlands.wars;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.unitedlands.classes.ConfigFile;
-import org.unitedlands.unitedlands.libs.ormlite.logger.LoggerFactory;
-import org.unitedlands.unitedlands.libs.ormlite.logger.NullLogBackend;
+
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.integrations.LuckPermsIntegration;
 import org.unitedlands.wars.listeners.PlayerDeathListener;
@@ -19,15 +17,13 @@ import org.unitedlands.wars.managers.WarEventManager;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.managers.WarMetaDataManager;
 import org.unitedlands.wars.schedulers.WarScheduler;
-import org.unitedlands.wars.utils.MessageProvider;
+
+import org.unitedlands.libs.ormlite.logger.LoggerFactory;
+import org.unitedlands.libs.ormlite.logger.NullLogBackend;
 
 public class UnitedWars extends JavaPlugin {
 
     private static UnitedWars instance;
-
-    private ConfigFile messageConfig;
-    private MessageProvider messageProvider;
-
     private DatabaseManager databaseManager;
     private LuckPermsIntegration luckPermsIntegration;
 
@@ -39,8 +35,6 @@ public class UnitedWars extends JavaPlugin {
         instance = this;
 
         saveDefaultConfig();
-        messageConfig = new ConfigFile(this, "messages/en_GB.yml");
-        messageProvider = new MessageProvider(messageConfig.get());
 
         createManagers();
 
@@ -71,7 +65,7 @@ public class UnitedWars extends JavaPlugin {
 
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new ServerEventListener(), this);
-        getServer().getPluginManager().registerEvents(new WarEventsListener(messageProvider), this);
+        getServer().getPluginManager().registerEvents(new WarEventsListener(), this);
         getServer().getPluginManager().registerEvents(new UnitedLandsListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
     }
@@ -88,10 +82,6 @@ public class UnitedWars extends JavaPlugin {
 
     public static UnitedWars instance() {
         return instance;
-    }
-
-    public MessageProvider getMessageProvider() {
-        return messageProvider;
     }
 
     public LuckPermsIntegration getLuckPermsIntegration() {

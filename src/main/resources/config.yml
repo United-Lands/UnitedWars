@@ -48,7 +48,7 @@ war-goal-settings:
       ATTACKER: "The attackers are victorius and have taken the war chest."
       DEFENDER: "The defenders have repelled the attack and taken the war chest."
     required-rank: mayor
-    warmup-time: 86400 # in seconds
+    warmup-time: 10 # in seconds
     duration: 259200 # in seconds
     cost: 30 # mobilisation points
     war-lives: 5
@@ -58,13 +58,8 @@ war-goal-settings:
       attacker: 10000
       defender: 10000
   revolt:
-    description: "A settlememt revolting against their country. If the rebels win, the region and all towns in it will cede from the country."
-    end-messages:
-      DRAW: "The war ended without a clear winner. The status quo has been restored."
-      ATTACKER: "The rebels have won the day! Their region has gained independence."
-      DEFENDER: "The rebels were defeated. The region remains under country control."
     required-rank: mayor
-    warmup-time: 86400 # in seconds
+    warmup-time: 10 # in seconds
     duration: 259200 # in seconds
     cost: 30 # mobilisation points
     war-lives: 5
@@ -73,13 +68,9 @@ war-goal-settings:
     scorecaps:
       attacker: 30000
       defender: 30000
-  claim_dispute:
-    description: "Two or more countries fighting to claim a region. The winning faction will take control."
-    end-messages:
-      DRAW: "The war ended without a clear winner. The region remains uncontrolled."
-      RIVAL: "The winning faction has seized control of the region."
+  claim-dispute:
     required-rank: leader
-    warmup-time: 86400 # in seconds
+    warmup-time: 10 # in seconds
     duration: 259200 # in seconds
     cost: 10 # mobilisation points
     war-lives: 5
@@ -88,11 +79,6 @@ war-goal-settings:
     scorecaps:
       claimant: 30000
   conquest:
-    description: "A full conquest war. The winning faction's leader will take control of the region and it settlements."
-    end-messages:
-      DRAW: "The war ended without a clear winner. All war contributions have been returned."
-      ATTACKER: "The attackers are victorius and have taken the target region."
-      DEFENDER: "The defenders have repelled the attack. The region remains in their control."
     required-rank: leader
     warmup-time: 10 # in seconds
     duration: 259200 # in seconds
@@ -104,11 +90,6 @@ war-goal-settings:
       attacker: 40000
       defender: 40000
   subjugation:
-    description: "A war to force a settlement into a country. If the attackers win, the settlement will become part of their realm."
-    end-messages:
-      DRAW: "The war ended without a clear winner. All war contributions have been returned."
-      ATTACKER: "The attackers are victorius and have taken the settlement."
-      DEFENDER: "The defenders have repelled the attack. The settlement remains free."
     required-rank: leader
     warmup-time: 10 # in seconds
     duration: 259200 # in seconds
@@ -119,6 +100,7 @@ war-goal-settings:
     scorecaps:
       attacker: 15000
       defender: 15000
+
 
 military-ranks:
   default: # civilian rank, players with no assigned military towny rank
@@ -219,3 +201,19 @@ notification-settings:
   SIEGE_CHUNK_CAPTURE:
     silent: false
     message: score-siege-capture-default
+
+###################################################
+# +---------------------------------------------+ #
+# |                  War Books                  | #
+# +---------------------------------------------+ #
+###################################################
+
+war-book-name: "Unnamed War"
+war-book-content: "Replace this page with a brief description of your war reasons.\n\n"
+war-book-lore:
+  - ""
+  - "<yellow>Rename <gray>this book at an anvil"
+  - "<gray>to set the name of the war."
+  - "<yellow>Right-click <gray>this book to write"
+  - "<gray>your reasoning behind the <yellow>war."
+  - ""

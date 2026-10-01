@@ -13,6 +13,11 @@ public class SettlementWarZone extends WarZone {
         this.type = "settlement";
     }
 
+    @Override 
+    public String getName() {
+        return UnitedLandsDataManager.instance().getSettlement(this.geopolObjectId).getCleanName();
+    }
+
     @Override
     public void generateAreas() {
 
@@ -23,8 +28,7 @@ public class SettlementWarZone extends WarZone {
 
         var settlement = UnitedLandsDataManager.instance().getSettlement(getGeopolObjectId());
         if (settlement == null) {
-            United.logger().error("Could not find settlement with id " + getGeopolObjectId() + " for war zone " + getUuid(),
-                    "UnitedLands");
+            United.logger().error("Could not find settlement with id " + getGeopolObjectId() + " for war zone " + getUuid(), "UnitedLands");
             return;
         }
 

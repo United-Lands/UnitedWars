@@ -1,4 +1,4 @@
-package org.unitedlands.wars.commands.handlers.admin;
+package org.unitedlands.wars.commands.handlers.admin.war;
 
 import java.util.List;
 import java.util.Random;
@@ -9,12 +9,17 @@ import org.unitedlands.registrars.command.UnitedCommandExecutor;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.war.War;
-import org.unitedlands.wars.commands.CmdWarAdmin;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.GeopolUtils;
 
-@UnitedSubCommand(parent = CmdWarAdmin.class, name = "create", description = "Creates a new war", usage = "/uwa creare <war_goal> <attacker> <target>", catchAll = true)
-public class CmdWarAdminCreate implements UnitedCommandExecutor {
+@UnitedSubCommand(
+    parent = CmdWarAdminWar.class, 
+    name = "create", 
+    description = "Creates a new war", 
+    usage = "/uwa war create <war_goal> <attacker> <target>", 
+    catchAll = true
+)
+public class CmdWarAdminWarCreate implements UnitedCommandExecutor {
 
     @Override
     public List<String> handleTab(CommandSender sender, String[] args) {

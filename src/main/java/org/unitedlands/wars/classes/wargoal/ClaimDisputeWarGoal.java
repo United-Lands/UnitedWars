@@ -18,8 +18,7 @@ import org.unitedlands.wars.classes.warzone.WarZone;
 public class ClaimDisputeWarGoal extends WarGoal {
 
     public ClaimDisputeWarGoal() {
-        super("claim_dispute");
-        this.description = UnitedWars.instance().getConfig().getString("war-goal-settings.claim_dispute.description");
+        super("claim-dispute");
     }
 
     @Override
@@ -54,7 +53,7 @@ public class ClaimDisputeWarGoal extends WarGoal {
             return null;
         }
 
-        var claimantScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.claim_dispute.scorecaps.claimant", 30000);
+        var claimantScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.claim-dispute.scorecaps.claimant", 30000);
 
         WarFaction faction1 = new WarFaction(war, WarFactionRole.CLAIMANT, country.getName(), -65536);
         faction1.setFactionLeaderId(declarerCountry);
@@ -93,21 +92,21 @@ public class ClaimDisputeWarGoal extends WarGoal {
 
         // Claim disputed only have one war zone (the disputed region)
         if (war.getWarZones().size() != 1) {
-            United.logger().error("Too many war zones for war goal claim_dispute", "UnitedWars");
+            United.logger().error("Too many war zones for war goal claim-dispute", "UnitedWars");
             return;
         }
 
         var zone = (war.getWarZones().stream().findFirst()).get();
         var region = UnitedLandsDataManager.instance().getRegion(zone.getGeopolObjectId());
         if (region == null) {
-            United.logger().error("Could not get region for war goal claim_dispute", "UnitedWars");
+            United.logger().error("Could not get region for war goal claim-dispute", "UnitedWars");
             return;
         }
 
         // Faction leaders in claim disputes are always countries.
         var country = UnitedLandsDataManager.instance().getCountry(war.getWinningFaction().getFactionLeaderId());
         if (country == null) {
-            United.logger().error("Could not get winning country for war goal claim_dispute", "UnitedWars");
+            United.logger().error("Could not get winning country for war goal claim-dispute", "UnitedWars");
             return;
         }
 

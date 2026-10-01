@@ -6,10 +6,3 @@ description: Project description
 author: Theriel_
 depend: [UnitedLib, UnitedLands]
 softdepend: [LuckPerms]
-commands:
-  unitedwarsadmin:
-    description: UnitedWars admin commands.
-    permission: united.wars.admin
-    aliases: [wa]
-  war:
-    description: UnitedWars main commands.

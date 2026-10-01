@@ -16,8 +16,8 @@ import org.unitedlands.restoration.UnitedRestoration;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.unitedlands.classes.db.Identifiable;
 import org.unitedlands.unitedlands.integrations.Pl3xMap.Pl3xMapRenderer;
-import org.unitedlands.unitedlands.libs.ormlite.field.DatabaseField;
-import org.unitedlands.unitedlands.libs.ormlite.table.DatabaseTable;
+import org.unitedlands.libs.ormlite.field.DatabaseField;
+import org.unitedlands.libs.ormlite.table.DatabaseTable;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.war.War;
@@ -61,6 +61,10 @@ public class WarZone implements Identifiable {
     protected transient Set<Coordinates> area = new HashSet<>();
     protected transient Set<Coordinates> griefArea = new HashSet<>();
     protected transient Set<CaptureZoneChunk> captureArea = new HashSet<>();
+
+    public String getName() {
+        return null;
+    }
 
     public WarZone() {
 
@@ -278,7 +282,7 @@ public class WarZone implements Identifiable {
     }
 
     public void backupGriefZone() {
-        var snapshotManager = UnitedRestoration.getInstance().getChunkSnapshotManager();
+        var snapshotManager = UnitedRestoration.instance().getChunkSnapshotManager();
         United.logger().info("Backing up " + griefArea.size() + " chunks for war zone " + uuid);
         for (var coords : griefArea) {
             coords.getWorld().getChunkAtAsync(coords.getX(), coords.getZ()).thenCompose(chunk -> {
@@ -298,7 +302,7 @@ public class WarZone implements Identifiable {
     }
 
     public void restoreGriefZone() {
-        var snapshotManager = UnitedRestoration.getInstance().getChunkSnapshotManager();
+        var snapshotManager = UnitedRestoration.instance().getChunkSnapshotManager();
         for (var coords : griefArea) {
             snapshotManager.restoreSnapshot(coords.getWorld(), coords.getX(), coords.getZ()).whenComplete((success, ex) -> {
                 if (ex != null) {

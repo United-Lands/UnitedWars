@@ -18,7 +18,6 @@ public class SkirmishWarGoal extends WarGoal {
 
     public SkirmishWarGoal() {
         super("skirmish");
-        this.description = UnitedWars.instance().getConfig().getString("war-goal-settings.skirmish.description");
     }
 
     @Override

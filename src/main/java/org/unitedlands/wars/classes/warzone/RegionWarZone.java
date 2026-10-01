@@ -10,6 +10,11 @@ public class RegionWarZone extends WarZone {
         this.type = "region";
     }
 
+    @Override 
+    public String getName() {
+        return UnitedLandsDataManager.instance().getRegion(this.geopolObjectId).getCleanName();
+    }
+
     @Override
     public void generateAreas() {
 

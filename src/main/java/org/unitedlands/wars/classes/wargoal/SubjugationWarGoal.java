@@ -21,7 +21,6 @@ public class SubjugationWarGoal extends WarGoal {
 
     public SubjugationWarGoal() {
         super("subjugation");
-        this.description = UnitedWars.instance().getConfig().getString("war-goal-settings.subjugation.description");
     }
 
     @Override

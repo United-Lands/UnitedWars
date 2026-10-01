@@ -6,7 +6,7 @@ import org.unitedlands.registrars.command.UnitedCommandExecutor;
 
 @UnitedCommand(
         name = "unitedwarsadmin",
-        aliases = { "uwa" },
+        aliases = { "uwa", "waradmin", "wa" },
         description = "UnitedWars Admin commands",
         usage = "/uwa <command>",
         permission = "united.wars.admin"

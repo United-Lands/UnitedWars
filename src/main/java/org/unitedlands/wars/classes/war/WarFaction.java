@@ -9,11 +9,12 @@ import org.unitedlands.unitedlands.classes.Citizen;
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.unitedlands.classes.db.Identifiable;
-import org.unitedlands.unitedlands.libs.ormlite.field.DataType;
-import org.unitedlands.unitedlands.libs.ormlite.field.DatabaseField;
+import org.unitedlands.libs.ormlite.field.DataType;
+import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.unitedlands.utils.ColorUtils;
 import org.unitedlands.unitedlands.utils.SerializationUtils;
+import org.unitedlands.utils.United;
 import org.unitedlands.wars.managers.WarManager;
 
 public class WarFaction implements Identifiable {
@@ -265,9 +266,18 @@ public class WarFaction implements Identifiable {
         return name;
     }
 
+    public String getCleanName() {
+        return name.replace("_", " ");
+    }
+
     public String getColoredName() {
         var colorStr = ColorUtils.argbToHex(color);
         return "<" + colorStr + ">" + name + "</" + colorStr + ">";
+    }
+
+    public String getColoredCleanName() {
+        var colorStr = ColorUtils.argbToHex(color);
+        return "<" + colorStr + ">" + name.replace("_", " ") + "</" + colorStr + ">";
     }
 
     public void setName(String name) {
@@ -277,6 +287,10 @@ public class WarFaction implements Identifiable {
 
     public int getColor() {
         return color;
+    }
+
+    public String getColorHex() {
+        return ColorUtils.argbToHex(color);
     }
 
     public void setColor(int color) {
@@ -315,9 +329,19 @@ public class WarFaction implements Identifiable {
         this.stateChanged = true;
     }
 
-    public Map<String, String> getMessageReplacements() {
-        return Map.of("faction-name", getName(), "faction-name-colored", getColoredName(), "faction-color", ColorUtils.argbToHex(getColor()), "faction-score",
-                String.valueOf(score), "faction-role", getRole().toString());
+    public boolean isFactionLeader(UUID playerId) {
+        var citizen = UnitedLandsDataManager.instance().getCitizen(playerId);
+        if (citizen == null)
+            return false;
+        United.logger().debug("isFactionLeader");
+
+        if (citizen.hasSettlement() && this.factionLeaderId.equals(citizen.getSettlement().getUuid()) && citizen.isMayor()) {
+            return true;
+        }
+        if (citizen.hasCountry() && this.factionLeaderId.equals(citizen.getCountry().getUuid()) && citizen.isLeader()) {
+            return true;
+        }
+        return false;
     }
 
     @Override

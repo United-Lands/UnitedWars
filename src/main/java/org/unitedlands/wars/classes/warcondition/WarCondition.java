@@ -1,7 +1,5 @@
 package org.unitedlands.wars.classes.warcondition;
 
-import java.util.Map;
-
 import org.unitedlands.wars.classes.war.WarFaction;
 
 public abstract class WarCondition {
@@ -17,12 +15,6 @@ public abstract class WarCondition {
 
     public String getDescription() {
         return description;
-    }
-
-    public Map<String, String> getMessageReplacements() {
-        return Map.of(
-                "condition-id", getId(),
-                "condition-description", getDescription());
     }
 
 }

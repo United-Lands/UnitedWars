@@ -8,7 +8,7 @@ public class LastFactionAliveContition extends WarCondition {
 
     public LastFactionAliveContition() {
         this.id = "last_faction_alive";
-        this.description = "They are the last faction alive";
+        this.description = "Be the last faction alive";
     }
 
     @Override

@@ -8,7 +8,9 @@ import org.bukkit.util.Vector;
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
+import org.unitedlands.unitedlands.integrations.Pl3xMap.Pl3xMapRenderer;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
+import org.unitedlands.unitedlands.managers.UnitedLandsEconomyManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.war.War;
@@ -20,7 +22,6 @@ public class ConquestWarGoal extends WarGoal {
 
     public ConquestWarGoal() {
         super("conquest");
-        this.description = UnitedWars.instance().getConfig().getString("war-goal-settings.conquest.description");
     }
 
     @Override
@@ -173,6 +174,7 @@ public class ConquestWarGoal extends WarGoal {
         }
 
         var losingCountry = conqueredRegion.getCountry();
+
         losingCountry.removeRegion(conqueredRegion);
         losingCountry.saveAndRender();
 
@@ -180,18 +182,53 @@ public class ConquestWarGoal extends WarGoal {
         conqueredRegion.setCountry(winningCountry);
         for (var settlement : conqueredRegion.getSettlements()) {
             if (settlement.hasCountry()) {
-                for (var citizen : settlement.getCitizens())
-                {
+                for (var citizen : settlement.getCitizens()) {
                     citizen.removeCountryRanks();
                     citizen.save();
                 }
                 settlement.setCountry(winningCountry);
                 settlement.saveAndRender();
+
+                losingCountry.removeSettlement(settlement);
             }
         }
         conqueredRegion.saveAndRender();
         winningCountry.saveAndRender();
 
+        // See if the defeated country still has regions left. If not, delete it.
+        if (losingCountry.getRegionCount() == 0) {
+            United.logger().debug("Country " + losingCountry.getName() + " has lost its last region, removing.");
+            // The country has lost its last region and will be removed. 
+            removeCountry(winningCountry, losingCountry);
+
+        } else {
+
+            // Check if the defeated country's capital was in the conquered region. If so,
+            // select a random other capital. If the country doesn't have any more
+            // settlements, remove it.
+            var capital = losingCountry.getCapital();
+            if (capital.getRegion().equals(conqueredRegion)) {
+                var newCapital = losingCountry.getSettlements().stream().findAny().orElse(null);
+                if (newCapital != null) {
+                    losingCountry.setCapital(newCapital);
+                    losingCountry.saveAndRender();
+                } else {
+                    United.logger().debug("Country " + losingCountry.getName() + " has lost its last settlement, removing.");
+                    // The country has no more settlements and wil be removed.
+                    removeCountry(winningCountry, losingCountry);
+                }
+            }
+        }
+
+    }
+
+    private void removeCountry(Country winningCountry, Country losingCountry) {
+
+        // Remaining money will go to the winning country
+        UnitedLandsEconomyManager.instance().deposit(winningCountry.getUuid(), UnitedLandsEconomyManager.instance().getBalance(losingCountry.getUuid()),
+                "Dismanteled " + losingCountry.getCleanName());
+
+        UnitedLandsDataManager.instance().removeCountry(losingCountry);
     }
 
     @Override

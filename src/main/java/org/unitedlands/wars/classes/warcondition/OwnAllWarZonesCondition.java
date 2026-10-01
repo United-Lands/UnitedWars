@@ -6,7 +6,7 @@ public class OwnAllWarZonesCondition extends WarCondition {
 
     public OwnAllWarZonesCondition() {
         this.id = "own_all_war_zones";
-        this.description = "They own all war zones";
+        this.description = "Own all war zones";
     }
 
     @Override

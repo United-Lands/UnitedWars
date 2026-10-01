@@ -19,12 +19,12 @@ import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.WarBookUtils;
 
 @UnitedSubCommand(
-    parent = CmdWar.class, 
-    name = "book", 
-    description = "Creates a new war book", 
-    usage = "/war book <war_goal> [target_name]", 
-    catchAll = true, 
-    playerOnly = true
+    parent          = CmdWar.class, 
+    name            = "book", 
+    description     = "Creates a new war book", 
+    usage           = "/war book <war_goal> [target_name]", 
+    catchAll        = true, 
+    playerOnly      = true
 )
 public class CmdWarBook implements UnitedCommandExecutor {
 

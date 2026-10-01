@@ -53,7 +53,7 @@ public class SiegeChunkDisplayManager {
         } else {
             var owner = siegeChunk.getOwner();
             if (owner != null) {
-                label += "Owner: " + owner.getColoredName();
+                label += "Owner: " + owner.getColoredCleanName();
             } else {
                 label += "<gray>Unowned</gray>";
             }

@@ -5,8 +5,8 @@ import org.unitedlands.annotations.UnitedCommand;
 import org.unitedlands.registrars.command.UnitedCommandExecutor;
 
 @UnitedCommand(
-        name = "war",
-        aliases = { },
+        name = "ulwar",
+        aliases = { "war" },
         description = "War commands",
         usage = "/war <command>",
         playerOnly = true
