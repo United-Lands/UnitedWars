@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
@@ -15,6 +14,7 @@ import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
+import org.unitedlands.wars.events.WarGoalValidationEvent;
 
 public class RevoltWarGoal extends WarGoal {
 
@@ -40,6 +40,13 @@ public class RevoltWarGoal extends WarGoal {
                 return new ValidationResult(false, "The target region doesn't belong to a country.");
             }
 
+             // Trigger external validation (e.g. in UnitedPolitics)
+            var externalValidationEvent = new WarGoalValidationEvent(this, settlement, region.getCountry());
+            externalValidationEvent.callEvent();
+            if (!externalValidationEvent.isValid()) {
+                return new ValidationResult(false, externalValidationEvent.getValidationMessage());
+            }
+
         } else {
             return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
         }
@@ -47,14 +54,10 @@ public class RevoltWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarFaction> createFactions(UUID declarer, UUID target, War war) {
+    public Set<WarFaction> createFactions(GeopolObject declarer, GeopolObject target, War war) {
         Set<WarFaction> factions = new HashSet<>();
 
-        var declaringSettlement = UnitedLandsDataManager.instance().getSettlement(declarer);
-        if (declaringSettlement == null) {
-            United.logger().error("Unable to create revolt factions, missing declarer object.", "UnitedLands");
-            return null;
-        }
+        var declaringSettlement = (Settlement) declarer;
 
         // Remove the revolting town from the nation. If the revolt fails, they will be
         // put back.
@@ -72,7 +75,7 @@ public class RevoltWarGoal extends WarGoal {
         declarerFaction.setName("Rebels");
         declarerFaction.setColor(-65536);
         declarerFaction.setRole(WarFactionRole.ATTACKER);
-        declarerFaction.setFactionLeaderId(declarer);
+        declarerFaction.setFactionLeaderId(declaringSettlement.getUuid());
         declarerFaction.addSettlement(declaringSettlement);
         declarerFaction.setWar(war);
         declarerFaction.addWinCondition("reach_score", declarerScoreCap);
@@ -81,11 +84,7 @@ public class RevoltWarGoal extends WarGoal {
 
         factions.add(declarerFaction);
 
-        var targetRegion = UnitedLandsDataManager.instance().getRegion(target);
-        if (targetRegion == null) {
-            United.logger().error("Unable to create revolt factions, missing region object.", "UnitedLands");
-            return null;
-        }
+        var targetRegion = (Region) target;
 
         var targetCountry = targetRegion.getCountry();
         if (targetCountry == null) {
@@ -113,7 +112,7 @@ public class RevoltWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarZone> createWarZones(UUID declaringSettement, UUID targetRegion, War war) {
+    public Set<WarZone> createWarZones(GeopolObject declarer, GeopolObject target, War war) {
 
         var attackerFactions = war.getWarFactionMap().get(WarFactionRole.ATTACKER);
         var defenderFactions = war.getWarFactionMap().get(WarFactionRole.DEFENDER);
@@ -123,8 +122,8 @@ public class RevoltWarGoal extends WarGoal {
         }
 
         Set<WarZone> zones = new HashSet<>();
-        zones.add(createSettlementZone(war, attackerFactions.getFirst(), declaringSettement));
-        zones.add(createRegionZone(war, defenderFactions.getFirst(), targetRegion));
+        zones.add(createSettlementZone(war, attackerFactions.getFirst(), (Settlement) declarer));
+        zones.add(createRegionZone(war, defenderFactions.getFirst(), (Region) target));
 
         return zones;
     }
@@ -181,70 +180,23 @@ public class RevoltWarGoal extends WarGoal {
     }
 
     @Override
-    public void joinWar(UUID joiner, War war) {
+    public void joinWar(GeopolObject joiner, WarFaction faction) {
 
         // Both countries and settlements can join in a revolt war.
 
-        var country = UnitedLandsDataManager.instance().getCountry(joiner);
-        if (country != null) {
-            handleCountryJoin(country, war);
-        } else {
-            var settlement = UnitedLandsDataManager.instance().getSettlement(joiner);
-            if (settlement != null) {
-                handleSettlementJoin(settlement, war);
-            }
-        }
+        // var country = UnitedLandsDataManager.instance().getCountry(joiner);
+        // if (country != null) {
+        //     handleCountryJoin(country, war);
+        // } else {
+        //     var settlement = UnitedLandsDataManager.instance().getSettlement(joiner);
+        //     if (settlement != null) {
+        //         handleSettlementJoin(settlement, war);
+        //     }
+        // }
 
     }
 
-    private void handleCountryJoin(Country joiningCountry, War war) {
 
-        // Countries can be either allies of the defender (joining the defending side)
-        // or unassociated countries (joining the attacking rebel side)
 
-        // Checking for defending join first
-
-        var defenderFaction = war.getWarFaction(WarFactionRole.DEFENDER);
-        if (defenderFaction == null) {
-            United.logger().error("Critical error: No DEFENDER faction found in revolt war goal join.", "UnitedLands");
-            return;
-        }
-
-        var defendingCountry = UnitedLandsDataManager.instance().getCountry(defenderFaction.getFactionLeaderId());
-        if (defendingCountry == null) {
-            United.logger().error("Critical error: No defender country found in revolt war goal join.", "UnitedLands");
-            return;
-        }
-
-        if (defendingCountry.getAllies().contains(joiningCountry)) {
-            handleAllyJoin(joiningCountry, defenderFaction, war);
-        } else {
-
-            // Not a case of an ally joining the defender, so it must be an unassociated
-            // country supporting the attacker.
-
-            var attackerFaction = war.getWarFaction(WarFactionRole.ATTACKER);
-            if (attackerFaction == null) {
-                United.logger().error("Critical error: No ATTACKER faction found in revolt war goal join.", "UnitedLands");
-                return;
-            }
-
-            handleSupporterJoin(joiningCountry, attackerFaction, war);
-        }
-    }
-
-    private void handleAllyJoin(Country joiningCountry, WarFaction faction, War war) {
-        faction.addCountry(joiningCountry);
-        war.refreshOnlinePlayerFactions();
-    }
-
-    private void handleSupporterJoin(Country joiningCountry, WarFaction faction, War war) {
-        faction.addCountry(joiningCountry);
-        war.refreshOnlinePlayerFactions();
-    }
-
-    private void handleSettlementJoin(Settlement settlement, War war) {
-        // TODO: Check for region, unset settlement country, let them join, add war zone
-    }
 
 }

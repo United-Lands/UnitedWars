@@ -2,17 +2,15 @@ package org.unitedlands.wars.classes.wargoal;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Settlement;
-import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
+import org.unitedlands.wars.events.WarGoalValidationEvent;
 
 public class SkirmishWarGoal extends WarGoal {
 
@@ -30,6 +28,14 @@ public class SkirmishWarGoal extends WarGoal {
             if (settlement.equals(targetSettlement)) {
                 return new ValidationResult(false, "Attacker and target are the same.");
             }
+
+             // Trigger external validation (e.g. in UnitedPolitics)
+            var externalValidationEvent = new WarGoalValidationEvent(this, settlement, targetSettlement);
+            externalValidationEvent.callEvent();
+            if (!externalValidationEvent.isValid()) {
+                return new ValidationResult(false, externalValidationEvent.getValidationMessage());
+            }
+
         } else {
             return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
         }
@@ -37,22 +43,17 @@ public class SkirmishWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarFaction> createFactions(UUID declarer, UUID target, War war) {
+    public Set<WarFaction> createFactions(GeopolObject declarer, GeopolObject target, War war) {
 
         Set<WarFaction> factions = new HashSet<>();
 
-        var declaringSettlement = UnitedLandsDataManager.instance().getSettlement(declarer);
-        var targeSettlement = UnitedLandsDataManager.instance().getSettlement(target);
+        var declaringSettlement = (Settlement) declarer;
+        var targeSettlement = (Settlement) target;
 
-        if (declaringSettlement == null || targeSettlement == null) {
-            United.logger().error("Unable to create skirmish factions, missing declarer or target object.", "UnitedLands");
-            return null;
-        }
-
-        var declarerScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.skirmish.scorecaps.attacker", 10000);
+         var declarerScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.skirmish.scorecaps.attacker", 10000);
 
         WarFaction declarerFaction = new WarFaction(war, WarFactionRole.ATTACKER, declaringSettlement.getName(), -65536);
-        declarerFaction.setFactionLeaderId(declarer);
+        declarerFaction.setFactionLeaderId(declaringSettlement.getUuid());
         declarerFaction.addSettlement(declaringSettlement);
 
         declarerFaction.addWinCondition("reach_score", declarerScoreCap);
@@ -65,7 +66,7 @@ public class SkirmishWarGoal extends WarGoal {
         var targetScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.skirmish.scorecaps.defender", 10000);
 
         WarFaction targetFaction = new WarFaction(war, WarFactionRole.DEFENDER, targeSettlement.getName(), -16776961);
-        targetFaction.setFactionLeaderId(target);
+        targetFaction.setFactionLeaderId(targeSettlement.getUuid());
         targetFaction.addSettlement(targeSettlement);
 
         targetFaction.addWinCondition("reach_score", targetScoreCap);
@@ -79,7 +80,7 @@ public class SkirmishWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarZone> createWarZones(UUID declarer, UUID target, War war) {
+    public Set<WarZone> createWarZones(GeopolObject declarer, GeopolObject target, War war) {
 
         var attackerFactions = war.getWarFactionMap().get(WarFactionRole.ATTACKER);
         var defenderFactions = war.getWarFactionMap().get(WarFactionRole.DEFENDER);
@@ -89,14 +90,14 @@ public class SkirmishWarGoal extends WarGoal {
         }
 
         Set<WarZone> zones = new HashSet<>();
-        zones.add(createSettlementZone(war, attackerFactions.getFirst(), declarer));
-        zones.add(createSettlementZone(war, defenderFactions.getFirst(), target));
+        zones.add(createSettlementZone(war, attackerFactions.getFirst(), (Settlement) declarer));
+        zones.add(createSettlementZone(war, defenderFactions.getFirst(), (Settlement) target));
 
         return zones;
     }
 
     @Override
-    public void joinWar(UUID joiner, War war) {
+    public void joinWar(GeopolObject joiner, WarFaction faction) {
         // Skirmish wars don't allow anyone to join
     }
 

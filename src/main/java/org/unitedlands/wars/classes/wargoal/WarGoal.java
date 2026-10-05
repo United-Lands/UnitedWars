@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.unitedlands.unitedlands.classes.GeopolObject;
+import org.unitedlands.unitedlands.classes.Region;
+import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.warzone.RegionWarZone;
@@ -24,15 +26,15 @@ public abstract class WarGoal {
 
     public abstract ValidationResult validate(GeopolObject declarer, GeopolObject target);
 
-    public abstract Set<WarFaction> createFactions(UUID declarer, UUID target, War war);
+    public abstract Set<WarFaction> createFactions(GeopolObject declarer, GeopolObject target, War war);
 
-    public abstract Set<WarZone> createWarZones(UUID declarer, UUID target, War war);
+    public abstract Set<WarZone> createWarZones(GeopolObject declarer, GeopolObject target, War war);
 
-    public abstract void joinWar(UUID joiner, War war);
+    public abstract void joinWar(GeopolObject joiner, WarFaction faction);
 
     public abstract void resolve(War war);
 
-    protected WarZone createSettlementZone(War war, WarFaction owningFaction, UUID settlementId) {
+    protected WarZone createSettlementZone(War war, WarFaction owningFaction, Settlement settlement) {
         var settlementZone = new SettlementWarZone();
         settlementZone.setUuid(UUID.randomUUID());
         settlementZone.setWar(war);
@@ -40,16 +42,16 @@ public abstract class WarGoal {
             settlementZone.setFaction(owningFaction);
             settlementZone.setOccupier(owningFaction);
         }
-        settlementZone.setGeopolObjectId(settlementId);
+        settlementZone.setGeopolObjectId(settlement.getUuid());
         settlementZone.generateAreas();
         return settlementZone;
     }
 
-    protected WarZone createRegionZone(War war, WarFaction owningFaction, UUID regionId) {
+    protected WarZone createRegionZone(War war, WarFaction owningFaction, Region region) {
         var regionZone = new RegionWarZone();
         regionZone.setUuid(UUID.randomUUID());
         regionZone.setWar(war);
-        regionZone.setGeopolObjectId(regionId);
+        regionZone.setGeopolObjectId(region.getUuid());
         if (owningFaction != null) {
             regionZone.setFaction(owningFaction);
             regionZone.setOccupier(owningFaction);

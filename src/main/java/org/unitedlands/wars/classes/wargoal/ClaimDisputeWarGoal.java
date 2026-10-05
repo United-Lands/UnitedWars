@@ -2,8 +2,6 @@ package org.unitedlands.wars.classes.wargoal;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
@@ -14,6 +12,7 @@ import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
+import org.unitedlands.wars.events.WarGoalValidationEvent;
 
 public class ClaimDisputeWarGoal extends WarGoal {
 
@@ -34,6 +33,13 @@ public class ClaimDisputeWarGoal extends WarGoal {
                 return new ValidationResult(false, "The region is already being claimed by the country.");
             }
 
+            // Trigger external validation (e.g. in UnitedPolitics)
+            var externalValidationEvent = new WarGoalValidationEvent(this, country, region.getClaimantCountry());
+            externalValidationEvent.callEvent();
+            if (!externalValidationEvent.isValid()) {
+                return new ValidationResult(false, externalValidationEvent.getValidationMessage());
+            }
+
         } else {
             return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
         }
@@ -42,12 +48,12 @@ public class ClaimDisputeWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarFaction> createFactions(UUID declarerCountry, UUID targetRegion, War war) {
+    public Set<WarFaction> createFactions(GeopolObject declarer, GeopolObject target, War war) {
 
         Set<WarFaction> factions = new HashSet<>();
 
-        var country = UnitedLandsDataManager.instance().getCountry(declarerCountry);
-        var region = UnitedLandsDataManager.instance().getRegion(targetRegion);
+        var country = (Country) declarer;
+        var region = (Region) target;
         if (country == null || region == null) {
             United.logger().error("Unable to create claim dispute factions, missing declarer or target object.", "UnitedLands");
             return null;
@@ -56,7 +62,7 @@ public class ClaimDisputeWarGoal extends WarGoal {
         var claimantScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.claim-dispute.scorecaps.claimant", 30000);
 
         WarFaction faction1 = new WarFaction(war, WarFactionRole.CLAIMANT, country.getName(), -65536);
-        faction1.setFactionLeaderId(declarerCountry);
+        faction1.setFactionLeaderId(country.getUuid());
         faction1.addCountry(country);
         faction1.addWinCondition("reach_score", claimantScoreCap);
         faction1.addWinCondition("own_all_war_zones");
@@ -66,7 +72,7 @@ public class ClaimDisputeWarGoal extends WarGoal {
         var targetCountry = region.getClaimantCountry();
 
         WarFaction faction2 = new WarFaction(war, WarFactionRole.CLAIMANT, targetCountry.getName(), -16776961);
-        faction2.setFactionLeaderId(targetRegion);
+        faction2.setFactionLeaderId(targetCountry.getUuid());
         faction2.addCountry(targetCountry);
         faction2.addWinCondition("reach_score", claimantScoreCap);
         faction2.addWinCondition("own_all_war_zones");
@@ -77,9 +83,9 @@ public class ClaimDisputeWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarZone> createWarZones(UUID declarerCountry, UUID targetRegion, War war) {
+    public Set<WarZone> createWarZones(GeopolObject declarerCountry, GeopolObject targetRegion, War war) {
         Set<WarZone> zones = new HashSet<>();
-        zones.add(createRegionZone(war, null, targetRegion));
+        zones.add(createRegionZone(war, null, (Region) targetRegion));
         return zones;
     }
 
@@ -117,7 +123,7 @@ public class ClaimDisputeWarGoal extends WarGoal {
     }
 
     @Override
-    public void joinWar(UUID joiner, War war) {
+    public void joinWar(GeopolObject joiner, WarFaction faction) {
         // TODO Auto-generated method stub
 
     }

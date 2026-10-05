@@ -127,6 +127,7 @@ public class CmdWarBook implements UnitedCommandExecutor {
 
         }
 
+        // Do validation (internal & external)
         var validationResult = warGoal.validate(declarer, target);
         if (!validationResult.valid()) {
             United.messenger().send(sender, "player.war.book.validation-error", validationResult.message());

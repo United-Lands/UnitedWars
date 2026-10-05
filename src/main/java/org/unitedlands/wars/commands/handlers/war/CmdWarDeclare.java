@@ -20,13 +20,7 @@ import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.GeopolUtils;
 import org.unitedlands.wars.utils.WarBookUtils;
 
-@UnitedSubCommand(
-    parent = CmdWar.class, 
-    name = "declare", 
-    description = "Declares a war", 
-    usage = "/war declare", 
-    playerOnly = true
-)
+@UnitedSubCommand(parent = CmdWar.class, name = "declare", description = "Declares a war", usage = "/war declare", playerOnly = true)
 public class CmdWarDeclare implements UnitedCommandExecutor {
 
     @Override
@@ -75,6 +69,7 @@ public class CmdWarDeclare implements UnitedCommandExecutor {
             return;
         }
 
+        // Do validation (internal & external)
         var validationResult = warGoal.validate(declarer, target);
         if (!validationResult.valid()) {
             United.messenger().send(sender, "player.war.book.validation-error", validationResult.message());
@@ -94,7 +89,5 @@ public class CmdWarDeclare implements UnitedCommandExecutor {
 
         player.getInventory().setItem(EquipmentSlot.HAND, new ItemStack(Material.AIR));
     }
-
-
 
 }

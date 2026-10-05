@@ -236,7 +236,7 @@ public class WarManager {
 
         WarPreRegisterEvent warPreRegisterEvent = new WarPreRegisterEvent(war);
         warPreRegisterEvent.callEvent();
-        if (warPreRegisterEvent.isCancelled())
+        if (warPreRegisterEvent.isCancelled() || !warPreRegisterEvent.isValid())
             return;
 
         pendingWars.put(war.getUuid(), war);

@@ -2,8 +2,6 @@ package org.unitedlands.wars.classes.wargoal;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
 import org.bukkit.util.Vector;
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
@@ -16,6 +14,8 @@ import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
+import org.unitedlands.wars.events.WarGoalValidationEvent;
+import org.unitedlands.wars.events.WarPreJoinEvent;
 
 public class ConquestWarGoal extends WarGoal {
 
@@ -35,6 +35,14 @@ public class ConquestWarGoal extends WarGoal {
                 return new ValidationResult(false, "The target region already belongs to the country.");
             }
 
+            // Trigger external validation (e.g. in UnitedPolitics)
+            var externalValidationEvent = new WarGoalValidationEvent(this, country, region.getCountry());
+            externalValidationEvent.callEvent();
+
+            if (!externalValidationEvent.isValid()) {
+                return new ValidationResult(false, externalValidationEvent.getValidationMessage());
+            }
+
         } else {
             return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
         }
@@ -42,12 +50,12 @@ public class ConquestWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarFaction> createFactions(UUID declarerCountry, UUID targetRegion, War war) {
+    public Set<WarFaction> createFactions(GeopolObject declarer, GeopolObject target, War war) {
 
         Set<WarFaction> factions = new HashSet<>();
 
-        var country = UnitedLandsDataManager.instance().getCountry(declarerCountry);
-        var region = UnitedLandsDataManager.instance().getRegion(targetRegion);
+        var country = (Country) declarer;
+        var region = (Region) target;
         if (country == null || region == null) {
             United.logger().error("Unable to create conquest factions, missing declarer or target object.", "UnitedLands");
             return null;
@@ -55,7 +63,7 @@ public class ConquestWarGoal extends WarGoal {
 
         WarFaction attackerFaction = new WarFaction(war, WarFactionRole.ATTACKER, country.getName(), -65536);
         attackerFaction.setRole(WarFactionRole.ATTACKER);
-        attackerFaction.setFactionLeaderId(declarerCountry);
+        attackerFaction.setFactionLeaderId(country.getUuid());
         attackerFaction.addCountry(country);
 
         var attackerScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.conquest.scorecaps.attacker", 30000);
@@ -83,7 +91,7 @@ public class ConquestWarGoal extends WarGoal {
     }
 
     @Override
-    public Set<WarZone> createWarZones(UUID declarerCountry, UUID targetRegionId, War war) {
+    public Set<WarZone> createWarZones(GeopolObject declarer, GeopolObject target, War war) {
         Set<WarZone> zones = new HashSet<>();
 
         var attackerFactions = war.getWarFactionMap().get(WarFactionRole.ATTACKER);
@@ -93,39 +101,39 @@ public class ConquestWarGoal extends WarGoal {
             return new HashSet<>();
         }
 
-        var region = UnitedLandsDataManager.instance().getRegion(targetRegionId);
+        var targetRegion = (Region) target;
 
         // If the target region has one or more nation towns, those will be the target
         // of the conquest. Otherwise the region center will be the war zone.
-        if (region.getSettlements().size() > 0) {
-            var countrySettlements = region.getSettlements().stream().filter(s -> s.hasCountry()).toList();
+        if (targetRegion.getSettlements().size() > 0) {
+            var countrySettlements = targetRegion.getSettlements().stream().filter(s -> s.hasCountry()).toList();
             if (countrySettlements.size() > 0) {
                 for (var countrySettlement : countrySettlements) {
-                    zones.add(createSettlementZone(war, defenderFactions.getFirst(), countrySettlement.getUuid()));
+                    zones.add(createSettlementZone(war, defenderFactions.getFirst(), countrySettlement));
                 }
             } else {
-                zones.add(createRegionZone(war, defenderFactions.getFirst(), targetRegionId));
+                zones.add(createRegionZone(war, defenderFactions.getFirst(), targetRegion));
             }
         } else {
-            zones.add(createRegionZone(war, defenderFactions.getFirst(), targetRegionId));
+            zones.add(createRegionZone(war, defenderFactions.getFirst(), targetRegion));
         }
 
         // To allow counter attacks for the defenders, find the attacker region that is
         // closest to the target region and also make it a war zone according to the
         // same rules as above.
-        var attackerCountry = UnitedLandsDataManager.instance().getCountry(attackerFactions.getFirst().getFactionLeaderId());
+        var attackerCountry = (UnitedLandsDataManager.instance().getCountry(attackerFactions.getFirst().getFactionLeaderId()));
         if (attackerCountry == null) {
             United.logger().error("Mising attacking country in war goal conquest.", "UnitedWars");
             return new HashSet<>();
         }
 
-        Vector regionHome = new Vector(region.getHomeChunkCoordinatesX(), 0, region.getHomeChunkCoordinatesZ());
+        Vector targetRegionHome = new Vector(targetRegion.getHomeChunkCoordinatesX(), 0, targetRegion.getHomeChunkCoordinatesZ());
 
         Region closestAttackerRegion = null;
         Double closestDistance = Double.POSITIVE_INFINITY;
         for (var attackerRegion : attackerCountry.getRegions()) {
             Vector attackerRegionHome = new Vector(attackerRegion.getHomeChunkCoordinatesX(), 0, attackerRegion.getHomeChunkCoordinatesZ());
-            var dist = regionHome.distanceSquared(attackerRegionHome);
+            var dist = targetRegionHome.distanceSquared(attackerRegionHome);
             if (dist < closestDistance) {
                 closestDistance = dist;
                 closestAttackerRegion = attackerRegion;
@@ -136,13 +144,13 @@ public class ConquestWarGoal extends WarGoal {
             var attackerCountrySettlements = closestAttackerRegion.getSettlements().stream().filter(s -> s.hasCountry()).toList();
             if (attackerCountrySettlements.size() > 0) {
                 for (var attackerCountrySettlement : attackerCountrySettlements) {
-                    zones.add(createSettlementZone(war, attackerFactions.getFirst(), attackerCountrySettlement.getUuid()));
+                    zones.add(createSettlementZone(war, attackerFactions.getFirst(), attackerCountrySettlement));
                 }
             } else {
-                zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion.getUuid()));
+                zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion));
             }
         } else {
-            zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion.getUuid()));
+            zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion));
         }
 
         return zones;
@@ -197,7 +205,7 @@ public class ConquestWarGoal extends WarGoal {
         // See if the defeated country still has regions left. If not, delete it.
         if (losingCountry.getRegionCount() == 0) {
             United.logger().debug("Country " + losingCountry.getName() + " has lost its last region, removing.");
-            // The country has lost its last region and will be removed. 
+            // The country has lost its last region and will be removed.
             removeCountry(winningCountry, losingCountry);
 
         } else {
@@ -231,8 +239,23 @@ public class ConquestWarGoal extends WarGoal {
     }
 
     @Override
-    public void joinWar(UUID joiner, War war) {
+    public void joinWar(GeopolObject joiner, WarFaction faction) {
 
+    }
+
+    public ValidationResult validateJoinConditions(GeopolObject joiner, WarFaction faction) {
+
+        if (!(joiner instanceof Country))
+            return new ValidationResult(false, "Only countries can join this war");
+
+        // Let other plugins cancel the join based on their logic (e.g. missing
+        // alliances in UnitedPolitics)
+        var event = new WarPreJoinEvent(faction.getWar(), joiner, faction);
+        event.callEvent();
+        if (event.isCancelled())
+            return new ValidationResult(false, event.getCancelMessage());
+
+        return new ValidationResult(true, null);
     }
 
 }

@@ -295,14 +295,14 @@ public class War implements Identifiable {
         war.setScheduledBeginTime(System.currentTimeMillis() + (warmup * 1000));
         war.setScheduledEndTime(System.currentTimeMillis() + (warmup * 1000) + (duration * 1000));
 
-        var factions = warGoal.createFactions(declarer.getUuid(), target.getUuid(), war);
+        var factions = warGoal.createFactions(declarer, target, war);
         if (factions == null) {
             United.logger().error("Could not create war factions, cancelling war creation.");
             return null;
         }
         war.setWarFactions(factions);
 
-        var warZones = warGoal.createWarZones(declarer.getUuid(), target.getUuid(), war);
+        var warZones = warGoal.createWarZones(declarer, target, war);
         if (warZones == null) {
             United.logger().error("Could not create war zones, cancelling war creation.");
             return null;

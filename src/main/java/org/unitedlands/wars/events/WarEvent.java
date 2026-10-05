@@ -8,6 +8,9 @@ import org.unitedlands.wars.classes.war.War;
 public class WarEvent extends Event implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
     private boolean cancelled;
 
     private final War war;
@@ -18,10 +21,6 @@ public class WarEvent extends Event implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 
