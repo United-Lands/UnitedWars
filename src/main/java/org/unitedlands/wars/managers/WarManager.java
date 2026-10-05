@@ -335,8 +335,17 @@ public class WarManager {
     }
 
     public boolean citizenHasMilitaryRank(Citizen citizen) {
+
+        // Mayors and country leader always count as having a military rank
+        if (citizen.isMayor() || citizen.isLeader())
+            return true;
+
         var ranks = UnitedWars.instance().getConfig().getConfigurationSection("military-ranks").getKeys(false);
-        var intersection = new ArrayList<String>(citizen.getSettlementRanks());
+
+        var citizenRanks = (new ArrayList<>(citizen.getSettlementRanks()));
+        citizenRanks.addAll(citizen.getCountryRanks());
+        
+        var intersection = new ArrayList<String>(citizenRanks);
         intersection.retainAll(ranks);
         return intersection.size() > 0;
     }
@@ -420,6 +429,10 @@ public class WarManager {
         var titles = getPendingWarTitles();
         titles.addAll(getActiveWarTitles());
         return titles;
+    }
+
+    public List<String> getWarFactionNames() {
+        return warFactions.values().stream().map(WarFaction::getName).toList();
     }
 
     public WarFaction getWarFaction(UUID id) {

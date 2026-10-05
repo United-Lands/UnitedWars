@@ -8,8 +8,10 @@ import org.unitedlands.utils.United;
 import org.unitedlands.wars.integrations.LuckPermsIntegration;
 import org.unitedlands.wars.listeners.PlayerDeathListener;
 import org.unitedlands.wars.listeners.ServerEventListener;
-import org.unitedlands.wars.listeners.UnitedLandsListener;
 import org.unitedlands.wars.listeners.WarEventsListener;
+import org.unitedlands.wars.listeners.UnitedLands.UnitedLandsCountryListener;
+import org.unitedlands.wars.listeners.UnitedLands.UnitedLandsInfoscreenListener;
+import org.unitedlands.wars.listeners.UnitedLands.UnitedLandsMovementListener;
 import org.unitedlands.wars.managers.DatabaseManager;
 import org.unitedlands.wars.managers.SiegeChunkDisplayManager;
 import org.unitedlands.wars.managers.SiegeManager;
@@ -66,7 +68,9 @@ public class UnitedWars extends JavaPlugin {
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new ServerEventListener(), this);
         getServer().getPluginManager().registerEvents(new WarEventsListener(), this);
-        getServer().getPluginManager().registerEvents(new UnitedLandsListener(), this);
+        getServer().getPluginManager().registerEvents(new UnitedLandsMovementListener(), this);
+        getServer().getPluginManager().registerEvents(new UnitedLandsCountryListener(), this);
+        getServer().getPluginManager().registerEvents(new UnitedLandsInfoscreenListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
     }
 

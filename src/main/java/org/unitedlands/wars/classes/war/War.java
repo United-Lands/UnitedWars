@@ -456,8 +456,16 @@ public class War implements Identifiable {
         if (activityPoints == 0)
             return;
 
-        for (var entry : playerFactions.entrySet()) {
-            var activityScoreEvent = new WarScoreEvent(this, entry.getKey(), entry.getValue(), WarScoreType.ACTIVITY, activityPoints);
+        for (var playerFactionEntry : playerFactions.entrySet()) {
+
+            var playerChunkCoords = CoordinateUtils.locationToChunkCoordinates(playerFactionEntry.getKey().getLocation());
+            var warZone = WarManager.instance().getWarZone(playerChunkCoords);
+
+            // Only award activity points if a player is in a war zone and that war zone does NOT belong to the player's faction
+            if (warZone == null || playerFactionEntry.getValue().equals(warZone.getFaction()))
+                continue;
+
+            var activityScoreEvent = new WarScoreEvent(this, playerFactionEntry.getKey(), playerFactionEntry.getValue(), WarScoreType.ACTIVITY, activityPoints);
             activityScoreEvent.callEvent();
         }
 

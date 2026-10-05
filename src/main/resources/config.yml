@@ -24,6 +24,19 @@ mysql:
 warscheduler:
   check-interval: 15 # in seconds
 
+geopol-attribute-defaults:
+  MOBILIZATION:
+    current-value: 20
+    max-value: 100
+    min-value: 0
+    daily-change: 1
+  MAX_MERCENARIES:
+    current-value: 5
+    max-value: 5
+    min-value: 0
+    daily-change: 0
+
+
 ###################################################
 # +---------------------------------------------+ #
 # |                 War Settings                | #
@@ -42,11 +55,6 @@ war-immunity-duration: 10080 # in minutes
 # Settings for different war goals
 war-goal-settings:
   skirmish:
-    description: "A small-scale fight between two settlements. The winning settlement will take the war chest."
-    end-messages:
-      DRAW: "The war ended without a clear winner. All war contributions have been returned."
-      ATTACKER: "The attackers are victorius and have taken the war chest."
-      DEFENDER: "The defenders have repelled the attack and taken the war chest."
     required-rank: mayor
     warmup-time: 10 # in seconds
     duration: 259200 # in seconds
@@ -100,7 +108,6 @@ war-goal-settings:
     scorecaps:
       attacker: 15000
       defender: 15000
-
 
 military-ranks:
   default: # civilian rank, players with no assigned military towny rank

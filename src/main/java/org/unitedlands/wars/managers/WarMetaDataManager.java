@@ -55,7 +55,7 @@ public class WarMetaDataManager {
 
         // Add wars that have been registered while the player was offline
         ArrayList<IntegerMetaDataField> newWarLivesMetas = new ArrayList<>();
-        var playerWars = WarManager.instance().getActivePlayerWars(player);
+        var playerWars = WarManager.instance().getPlayerWars(player);
         for (War war : playerWars) {
             var warKey = getWarLivesMetaKey(war.getUuid());
             if (!citizenMeta.containsKey(warKey)) {

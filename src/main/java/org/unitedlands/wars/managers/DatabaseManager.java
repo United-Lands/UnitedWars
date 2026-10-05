@@ -11,7 +11,7 @@ import org.unitedlands.libs.ormlite.table.TableUtils;
 import org.unitedlands.libs.zaxxer.hikari.HikariConfig;
 import org.unitedlands.libs.zaxxer.hikari.HikariDataSource;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.GeneralConfig;
 import org.unitedlands.wars.classes.db.SiegeChunkService;
 import org.unitedlands.wars.classes.db.WarFactionService;
 import org.unitedlands.wars.classes.db.WarService;
@@ -39,20 +39,18 @@ public class DatabaseManager {
 
         // instance = this;
 
-        var fileConfig = UnitedWars.instance().getConfig();
-
-        String host = fileConfig.getString("mysql.host");
-        int port = fileConfig.getInt("mysql.port");
-        String database = fileConfig.getString("mysql.database");
-        String username = fileConfig.getString("mysql.username");
-        String password = fileConfig.getString("mysql.password");
+        String host = GeneralConfig.get().mysql().host();
+        int port = GeneralConfig.get().mysql().port();
+        String database = GeneralConfig.get().mysql().database();
+        String username = GeneralConfig.get().mysql().username();
+        String password = GeneralConfig.get().mysql().password();
 
         String jdbcUrl = String.format(
                 "jdbc:mysql://%s:%d/%s?useSSL=%s&serverTimezone=UTC&allowPublicKeyRetrieval=true",
                 host,
                 port,
                 database,
-                fileConfig.getBoolean("developer-mode") ? "false" : "true");
+                GeneralConfig.get().developerMode() ? "false" : "true");
 
         try {
 
@@ -123,7 +121,7 @@ public class DatabaseManager {
     public <T, ID> Dao<T, ID> getDao(Class<T> clazz) throws SQLException {
 
         // In developer mode, drop the table if it exists
-        if (UnitedWars.instance().getConfig().getBoolean("developer-mode"))
+        if (GeneralConfig.get().developerMode())
             TableUtils.dropTable(connectionSource, clazz, true);
 
         TableUtils.createTableIfNotExists(connectionSource, clazz);

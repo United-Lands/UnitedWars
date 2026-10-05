@@ -15,7 +15,9 @@ import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.unitedlands.utils.ColorUtils;
 import org.unitedlands.unitedlands.utils.SerializationUtils;
 import org.unitedlands.utils.United;
+import org.unitedlands.wars.classes.config.GeneralConfig;
 import org.unitedlands.wars.managers.WarManager;
+import org.unitedlands.wars.utils.GeopolUtils;
 
 public class WarFaction implements Identifiable {
 
@@ -176,6 +178,8 @@ public class WarFaction implements Identifiable {
         return getMercenaries().contains(mercenary);
     }
 
+
+
     public void addMercenary(Citizen mercenary) {
         var c = new HashSet<>(getMercenaries());
         c.add(mercenary);
@@ -188,6 +192,15 @@ public class WarFaction implements Identifiable {
         c.remove(mercenary);
         setMercenaries(c);
         this.stateChanged = true;
+    }
+
+    public double getMaxMercenaries() {
+        var leader = GeopolUtils.getGeopolObject(factionLeaderId);
+        return leader.getModifiedAttribute("MAX_MERCENARIES", GeneralConfig.get().geopolAttributeDefaults().get("MAX_MERCENARIES")).getCurrentValue();
+    }
+
+    public int getMercenaryCount() {
+        return getMercenaries().size();
     }
 
     public Set<Citizen> getMercenaries() {

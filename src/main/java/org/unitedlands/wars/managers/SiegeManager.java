@@ -76,6 +76,8 @@ public class SiegeManager {
     }
 
     public void updatePlayersInChunk(Player player, Coordinates fromCoordinates, Coordinates toCoordinates) {
+        
+        // TODO: Reactivate!!
 
         // if (player.getGameMode() != GameMode.SURVIVAL)
         // return;
@@ -133,6 +135,10 @@ public class SiegeManager {
         var siegeChunk = siegeChunks.get(toCoordinates);
         if (siegeChunk == null)
             return;
+
+        if (WarMetaDataManager.instance().getWarLives(player, siegeChunk.getWar()) == 0)
+            return;
+
         siegeChunk.addPlayer(player);
         activeSiegeChunks.add(siegeChunk);
         SiegeChunkDisplayManager.instance().addPlayerToHealthBar(siegeChunk, player);
