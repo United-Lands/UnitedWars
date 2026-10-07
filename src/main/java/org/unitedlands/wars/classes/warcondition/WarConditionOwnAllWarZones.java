@@ -2,9 +2,9 @@ package org.unitedlands.wars.classes.warcondition;
 
 import org.unitedlands.wars.classes.war.WarFaction;
 
-public class OwnAllWarZonesCondition extends WarCondition {
+public class WarConditionOwnAllWarZones extends WarCondition {
 
-    public OwnAllWarZonesCondition() {
+    public WarConditionOwnAllWarZones() {
         this.id = "own_all_war_zones";
         this.description = "Own all war zones";
     }

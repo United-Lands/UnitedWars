@@ -13,7 +13,7 @@ import org.unitedlands.registrars.command.UnitedCommandExecutor;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.commands.CmdWar;
 import org.unitedlands.wars.managers.WarManager;
@@ -53,7 +53,7 @@ public class CmdWarDeclare implements UnitedCommandExecutor {
 
         var warGoal = WarManager.instance().getWarGoal((String) warBookData.get("wargoal"));
 
-        var requiredRank = UnitedWars.instance().getConfig().getString("war-goal-settings." + warGoal.getId() + ".required-rank");
+        var requiredRank = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId()).requiredRank();
         if (requiredRank != null) {
             if (!(citizen.getSettlementRanks().contains(requiredRank) || citizen.getCountryRanks().contains(requiredRank))) {
                 United.messenger().send(sender, "player.war.book.no-rank");

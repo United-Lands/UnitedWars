@@ -22,7 +22,7 @@ import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.unitedlands.utils.CoordinateUtils;
 import org.unitedlands.unitedlands.utils.SerializationUtils;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.wargoal.WarGoal;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarScoreEvent;
@@ -284,12 +284,12 @@ public class War implements Identifiable {
         war.setWarGoal(warGoal);
         war.setWarTargetId(target.getUuid());
 
-        var config = UnitedWars.instance().getConfig().getConfigurationSection("war-goal-settings." + warGoal.getId());
-        if (config == null)
+        var goalSettings = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId());
+        if (goalSettings == null)
             throw new MissingFormatArgumentException("Could not find config section for war goal " + warGoal.getId());
 
-        long warmup = config.getLong("warmup-time");
-        long duration = config.getLong("duration");
+        long warmup = goalSettings.warmupTime();
+        long duration = goalSettings.duration();
 
         war.setTimestamp(System.currentTimeMillis());
         war.setScheduledBeginTime(System.currentTimeMillis() + (warmup * 1000));
@@ -452,7 +452,7 @@ public class War implements Identifiable {
 
     public void awardActivityScores() {
 
-        var activityPoints = UnitedWars.instance().getConfig().getInt("score-settings.activity", 0);
+        var activityPoints = UnitedWarsConfig.get().scoreSettings().activity();
         if (activityPoints == 0)
             return;
 
@@ -473,7 +473,7 @@ public class War implements Identifiable {
 
     public void updateSiegesInWarZones() {
 
-        var overrideActivityRequirement = UnitedWars.instance().getConfig().getBoolean("siege-settings.override-activity-requirement", false);
+        var overrideActivityRequirement = UnitedWarsConfig.get().siegeSettings().overrideActivityRequirement();
 
         for (var warZone : getWarZones()) {
             warZone.checkOccupation();

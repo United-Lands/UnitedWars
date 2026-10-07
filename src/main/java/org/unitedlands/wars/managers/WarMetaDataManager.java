@@ -12,6 +12,7 @@ import org.unitedlands.unitedlands.classes.metadata.IntegerMetaDataField;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 
@@ -70,7 +71,7 @@ public class WarMetaDataManager {
 
     private IntegerMetaDataField addWarLivesMeta(Citizen citizen, String warKey, War war) {
         var goal = war.getWarGoal().getId();
-        var warGoalLives = UnitedWars.instance().getConfig().getInt("war-goal-settings." + goal + ".war-lives", 5);
+        var warGoalLives = UnitedWarsConfig.get().warGoalSettings().get(goal).warLives();
         var warLivedMetaData = new IntegerMetaDataField(warKey, warGoalLives, war.getCleanTitle() + " War Lives", true);
         citizen.addMetadata(warLivedMetaData);
         return warLivedMetaData;

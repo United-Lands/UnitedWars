@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -29,16 +30,16 @@ public class WarBookUtils {
 
         if (book.getItemMeta() instanceof BookMeta bookMeta) {
 
-            var bookContent = UnitedWars.instance().getConfig().getString("war-book-content");
+            var bookContent = UnitedWarsConfig.get().warBook().content();
             bookMeta.addPages(MiniMessage.miniMessage().deserialize(bookContent));
 
             bookMeta.addEnchant(Enchantment.LURE, 1, false);
             bookMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
-            var bookName = UnitedWars.instance().getConfig().getString("war-book-name");
+            var bookName = UnitedWarsConfig.get().warBook().name();
             bookMeta.displayName(MiniMessage.miniMessage().deserialize(bookName));
 
-            var bookLore = UnitedWars.instance().getConfig().getStringList("war-book-lore");
+            var bookLore = UnitedWarsConfig.get().warBook().lore();
             List<Component> bookLoreComponents = new ArrayList<>(bookLore.size());
             for (String line : bookLore) {
                 Component component = MiniMessage.miniMessage().deserialize(line);

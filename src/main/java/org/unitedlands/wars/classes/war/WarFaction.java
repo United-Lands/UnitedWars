@@ -15,7 +15,7 @@ import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.unitedlands.utils.ColorUtils;
 import org.unitedlands.unitedlands.utils.SerializationUtils;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.classes.config.GeneralConfig;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.GeopolUtils;
 
@@ -196,7 +196,7 @@ public class WarFaction implements Identifiable {
 
     public double getMaxMercenaries() {
         var leader = GeopolUtils.getGeopolObject(factionLeaderId);
-        return leader.getModifiedAttribute("MAX_MERCENARIES", GeneralConfig.get().geopolAttributeDefaults().get("MAX_MERCENARIES")).getCurrentValue();
+        return leader.getModifiedAttribute("MAX_MERCENARIES", UnitedWarsConfig.get().geopolAttributeDefaults().get("MAX_MERCENARIES")).getCurrentValue();
     }
 
     public int getMercenaryCount() {

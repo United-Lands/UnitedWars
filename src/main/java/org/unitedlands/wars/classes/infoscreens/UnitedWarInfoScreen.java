@@ -3,11 +3,11 @@ package org.unitedlands.wars.classes.infoscreens;
 import org.unitedlands.unitedlands.classes.infoscreen.InfoScreen;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.wars.classes.war.War;
-import org.unitedlands.wars.classes.wargoal.ClaimDisputeWarGoal;
-import org.unitedlands.wars.classes.wargoal.ConquestWarGoal;
-import org.unitedlands.wars.classes.wargoal.RevoltWarGoal;
-import org.unitedlands.wars.classes.wargoal.SkirmishWarGoal;
-import org.unitedlands.wars.classes.wargoal.SubjugationWarGoal;
+import org.unitedlands.wars.classes.wargoal.WarGoalClaimDispute;
+import org.unitedlands.wars.classes.wargoal.WarGoalConquest;
+import org.unitedlands.wars.classes.wargoal.WarGoalRevolt;
+import org.unitedlands.wars.classes.wargoal.WarGoalSkirmish;
+import org.unitedlands.wars.classes.wargoal.WarGoalSubjugation;
 
 public class UnitedWarInfoScreen extends InfoScreen {
 
@@ -15,14 +15,14 @@ public class UnitedWarInfoScreen extends InfoScreen {
     {
         var warGoal = war.getWarGoal();
         if (
-            warGoal instanceof ClaimDisputeWarGoal || 
-            warGoal instanceof ConquestWarGoal ||
-            warGoal instanceof RevoltWarGoal
+            warGoal instanceof WarGoalClaimDispute || 
+            warGoal instanceof WarGoalConquest ||
+            warGoal instanceof WarGoalRevolt
         ) {
             return UnitedLandsDataManager.instance().getRegion(war.getWarTargetId()).getCleanName();
         } else if (
-            warGoal instanceof SkirmishWarGoal ||
-            warGoal instanceof SubjugationWarGoal
+            warGoal instanceof WarGoalSkirmish ||
+            warGoal instanceof WarGoalSubjugation
         ) {
             return UnitedLandsDataManager.instance().getSettlement(war.getWarTargetId()).getCleanName();
         }

@@ -9,8 +9,8 @@ import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
-import org.unitedlands.wars.classes.warzone.RegionWarZone;
-import org.unitedlands.wars.classes.warzone.SettlementWarZone;
+import org.unitedlands.wars.classes.warzone.WarZoneRegion;
+import org.unitedlands.wars.classes.warzone.WarZoneSettlement;
 import org.unitedlands.wars.classes.warzone.WarZone;
 
 public abstract class WarGoal {
@@ -35,7 +35,7 @@ public abstract class WarGoal {
     public abstract void resolve(War war);
 
     protected WarZone createSettlementZone(War war, WarFaction owningFaction, Settlement settlement) {
-        var settlementZone = new SettlementWarZone();
+        var settlementZone = new WarZoneSettlement();
         settlementZone.setUuid(UUID.randomUUID());
         settlementZone.setWar(war);
         if (owningFaction != null) {
@@ -48,7 +48,7 @@ public abstract class WarGoal {
     }
 
     protected WarZone createRegionZone(War war, WarFaction owningFaction, Region region) {
-        var regionZone = new RegionWarZone();
+        var regionZone = new WarZoneRegion();
         regionZone.setUuid(UUID.randomUUID());
         regionZone.setWar(war);
         regionZone.setGeopolObjectId(region.getUuid());

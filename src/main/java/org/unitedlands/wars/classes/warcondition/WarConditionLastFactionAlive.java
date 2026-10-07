@@ -4,9 +4,9 @@ import java.util.stream.Collectors;
 
 import org.unitedlands.wars.classes.war.WarFaction;
 
-public class LastFactionAliveContition extends WarCondition {
+public class WarConditionLastFactionAlive extends WarCondition {
 
-    public LastFactionAliveContition() {
+    public WarConditionLastFactionAlive() {
         this.id = "last_faction_alive";
         this.description = "Be the last faction alive";
     }

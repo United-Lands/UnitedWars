@@ -20,6 +20,7 @@ import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.libs.ormlite.table.DatabaseTable;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.managers.SiegeManager;
@@ -251,11 +252,11 @@ public class WarZone implements Identifiable {
 
     public void renderMarkers() {
 
-        if (!UnitedWars.instance().getConfig().getBoolean("siege-settings.capture-markers.use", false))
+        if (!UnitedWarsConfig.get().siegeSettings().captureMarkers().use())
             return;
 
-        var layerKey = UnitedWars.instance().getConfig().getString("siege-settings.capture-markers.layer-key", "unitedwars");
-        var layerName = UnitedWars.instance().getConfig().getString("siege-settings.capture-markers.layer-name", "Wars");
+        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
+        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
   
         Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
             var marker = "siege";
@@ -271,9 +272,10 @@ public class WarZone implements Identifiable {
     }
 
     public void removeMarkers() {
-        var layerKey = UnitedWars.instance().getConfig().getString("siege-settings.capture-markers.layer-key", "unitedwars");
-        var layerName = UnitedWars.instance().getConfig().getString("siege-settings.capture-markers.layer-name", "Wars");
 
+        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
+        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
+  
         Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
             for (var chunk : captureArea) {
                 Pl3xMapRenderer.instance().removeMarker(chunk.coords.getWorld().getName(), getMarkerKey(chunk.coords()), layerKey, layerName);
@@ -318,9 +320,9 @@ public class WarZone implements Identifiable {
         return "marker-" + this.uuid + "-" + coords.getX() + "-" + coords.getZ();
     }
 
-    public SettlementWarZone asSettlementWarZone() {
+    public WarZoneSettlement asSettlementWarZone() {
 
-        var settlementWarZone = new SettlementWarZone();
+        var settlementWarZone = new WarZoneSettlement();
         settlementWarZone.setUuid(this.uuid);
         settlementWarZone.setGeopolObjectId(this.geopolObjectId);
         settlementWarZone.setWarId(this.warId);
@@ -331,9 +333,9 @@ public class WarZone implements Identifiable {
         return settlementWarZone;
     }
 
-    public RegionWarZone asRegiontWarZone() {
+    public WarZoneRegion asRegiontWarZone() {
 
-        var regionWarZone = new RegionWarZone();
+        var regionWarZone = new WarZoneRegion();
         regionWarZone.setUuid(this.uuid);
         regionWarZone.setGeopolObjectId(this.geopolObjectId);
         regionWarZone.setWarId(this.warId);

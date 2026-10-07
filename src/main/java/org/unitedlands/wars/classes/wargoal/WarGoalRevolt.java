@@ -9,16 +9,16 @@ import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
 
-public class RevoltWarGoal extends WarGoal {
+public class WarGoalRevolt extends WarGoal {
 
-    public RevoltWarGoal() {
+    public WarGoalRevolt() {
         super("revolt");
     }
 
@@ -68,7 +68,7 @@ public class RevoltWarGoal extends WarGoal {
         declaringSettlement.removeCountry();
         declaringSettlement.saveAndRender();
 
-        var declarerScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.revolt.scorecaps.attacker", 30000);
+        var declarerScoreCap = UnitedWarsConfig.get().warGoalSettings().get("revolt").scoreCaps().get("attacker").val();
 
         WarFaction declarerFaction = new WarFaction();
         declarerFaction.setUuid(UUID.randomUUID());
@@ -92,7 +92,7 @@ public class RevoltWarGoal extends WarGoal {
             return null;
         }
 
-        var targetScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.revolt.scorecaps.defender", 30000);
+        var targetScoreCap = UnitedWarsConfig.get().warGoalSettings().get("revolt").scoreCaps().get("defender").val();
 
         WarFaction targetFaction = new WarFaction();
         targetFaction.setUuid(UUID.randomUUID());

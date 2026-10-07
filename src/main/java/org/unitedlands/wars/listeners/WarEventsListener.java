@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.infoscreens.WarDeclaredInfoScreen;
 import org.unitedlands.wars.classes.infoscreens.WarEndInfoScreen;
 import org.unitedlands.wars.classes.infoscreens.WarStartInfoScreen;
@@ -56,19 +56,16 @@ public class WarEventsListener implements Listener {
     @EventHandler
     public void OnWarScore(WarScoreEvent event) {
 
-        // Logger.log("WarScoreEvent: " + event.getFinalScore() + " points scored by
-        // faction " + event.getFaction().getName() + " for " + event.getType());
-
         var silent = false;
         var message = "score-default";
 
-        var notificationSettings = UnitedWars.instance().getConfig().getConfigurationSection("notification-settings." + event.getType());
+        var notificationSettings = UnitedWarsConfig.get().notificationSettings().get(event.getType().toString());
         if (notificationSettings != null) {
-            silent = notificationSettings.getBoolean("silent", false);
-            message = notificationSettings.getString("message", "score-default");
+            silent = notificationSettings.silent();
+            message = notificationSettings.message();
         }
 
-        // TODO: genetare record
+        // TODO: generate record
 
         event.getFaction().addScore(event.getFinalScore());
 

@@ -4,9 +4,9 @@ import java.util.stream.Collectors;
 
 import org.unitedlands.wars.classes.war.WarFaction;
 
-public class OwnMinimumWarZonesCondition extends WarCondition {
+public class WarConditionOwnMinimumWarZones extends WarCondition {
 
-    public OwnMinimumWarZonesCondition() {
+    public WarConditionOwnMinimumWarZones() {
         this.id = "own_minimum_war_zones";
         this.description = "Own minimum war zones";
     }

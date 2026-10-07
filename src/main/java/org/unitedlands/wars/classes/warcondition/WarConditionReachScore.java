@@ -2,9 +2,9 @@ package org.unitedlands.wars.classes.warcondition;
 
 import org.unitedlands.wars.classes.war.WarFaction;
 
-public class ReachScoreCondition extends WarCondition {
+public class WarConditionReachScore extends WarCondition {
 
-    public ReachScoreCondition() {
+    public WarConditionReachScore() {
         this.id = "reach_score";
         this.description = "Reach score";
     }

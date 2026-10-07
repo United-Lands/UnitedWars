@@ -7,16 +7,16 @@ import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
 
-public class ClaimDisputeWarGoal extends WarGoal {
+public class WarGoalClaimDispute extends WarGoal {
 
-    public ClaimDisputeWarGoal() {
+    public WarGoalClaimDispute() {
         super("claim-dispute");
     }
 
@@ -59,7 +59,7 @@ public class ClaimDisputeWarGoal extends WarGoal {
             return null;
         }
 
-        var claimantScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.claim-dispute.scorecaps.claimant", 30000);
+        var claimantScoreCap = UnitedWarsConfig.get().warGoalSettings().get("claim-dispute").scoreCaps().get("claimant").val();
 
         WarFaction faction1 = new WarFaction(war, WarFactionRole.CLAIMANT, country.getName(), -65536);
         faction1.setFactionLeaderId(country.getUuid());

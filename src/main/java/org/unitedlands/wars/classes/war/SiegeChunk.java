@@ -6,13 +6,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.unitedlands.classes.db.Identifiable;
 import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.SiegeChunkHealthChangeEvent;
 import org.unitedlands.wars.events.WarScoreEvent;
@@ -210,12 +209,12 @@ public class SiegeChunk implements Identifiable {
 
     public static SiegeChunk create(WarZone warZone, Coordinates coordinates) {
 
-        ConfigurationSection chunkHealthSettings = UnitedWars.instance().getConfig().getConfigurationSection("siege-settings.chunk-max-health");
+        var chunkHealthSettings = UnitedWarsConfig.get().siegeSettings().chunkMaxHealth();
         if (chunkHealthSettings == null) {
             United.logger().warning("Couldn't find chunk health settings, aborting.", "UnitedWars");
             return null;
         }
-        ConfigurationSection chunkSoreSettings = UnitedWars.instance().getConfig().getConfigurationSection("score-settings.chunk-capture");
+        var chunkSoreSettings = UnitedWarsConfig.get().scoreSettings().chunkCapture();
         if (chunkSoreSettings == null) {
             United.logger().warning("Couldn't find chunk health settings, aborting.", "UnitedWars");
             return null;
@@ -233,16 +232,16 @@ public class SiegeChunk implements Identifiable {
             occupiable = captureAreaChunk.occupiable();
         }
 
-        if (chunkHealthSettings.getKeys(false).contains(chunkType)) {
-            maxHealth = chunkHealthSettings.getInt(chunkType);
+        if (chunkHealthSettings.has(chunkType)) {
+            maxHealth = chunkHealthSettings.get(chunkType).val();
         } else {
-            maxHealth = chunkHealthSettings.getInt("default");
+            maxHealth = chunkHealthSettings.get("default").val();
         }
 
-        if (chunkSoreSettings.getKeys(false).contains(chunkType)) {
-            scoreValue = chunkSoreSettings.getInt(chunkType);
+        if (chunkSoreSettings.has(chunkType)) {
+            scoreValue = chunkSoreSettings.get(chunkType).val();
         } else {
-            scoreValue = chunkSoreSettings.getInt("default");
+            scoreValue = chunkSoreSettings.get("default").val();
         }
 
         SiegeChunk siegeChunk = new SiegeChunk();
@@ -271,11 +270,11 @@ public class SiegeChunk implements Identifiable {
         if (leadingFaction == null)
             return;
 
-        int damageRate = UnitedWars.instance().getConfig().getInt("siege-settings.health-decay-rate", 1);
-        int healRate = UnitedWars.instance().getConfig().getInt("siege-settings.health-restore-rate", 1);
+        int damageRate = UnitedWarsConfig.get().siegeSettings().healthDecayRate();
+        int healRate = UnitedWarsConfig.get().siegeSettings().healthRestoreRate();
         int healthChange = 0;
         int factor = factionControl.margin();
-        if (!UnitedWars.instance().getConfig().getBoolean("use-superiority-multiplier", true))
+        if (!UnitedWarsConfig.get().siegeSettings().useSuperiorityMultiplier())
             factor = 1;
 
         // Damage if strongest faction is not owner, heal otherwise

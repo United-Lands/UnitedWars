@@ -7,9 +7,9 @@ import org.unitedlands.unitedlands.classes.SettlementChunk;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 
-public class SettlementWarZone extends WarZone {
+public class WarZoneSettlement extends WarZone {
 
-    public SettlementWarZone() {
+    public WarZoneSettlement() {
         this.type = "settlement";
     }
 

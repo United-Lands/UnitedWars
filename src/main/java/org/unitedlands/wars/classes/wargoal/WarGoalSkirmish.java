@@ -5,16 +5,16 @@ import java.util.Set;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
 
-public class SkirmishWarGoal extends WarGoal {
+public class WarGoalSkirmish extends WarGoal {
 
-    public SkirmishWarGoal() {
+    public WarGoalSkirmish() {
         super("skirmish");
     }
 
@@ -50,7 +50,7 @@ public class SkirmishWarGoal extends WarGoal {
         var declaringSettlement = (Settlement) declarer;
         var targeSettlement = (Settlement) target;
 
-         var declarerScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.skirmish.scorecaps.attacker", 10000);
+         var declarerScoreCap = UnitedWarsConfig.get().warGoalSettings().get("skirmish").scoreCaps().get("attacker").val();
 
         WarFaction declarerFaction = new WarFaction(war, WarFactionRole.ATTACKER, declaringSettlement.getName(), -65536);
         declarerFaction.setFactionLeaderId(declaringSettlement.getUuid());
@@ -63,7 +63,7 @@ public class SkirmishWarGoal extends WarGoal {
 
         factions.add(declarerFaction);
 
-        var targetScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.skirmish.scorecaps.defender", 10000);
+        var targetScoreCap = UnitedWarsConfig.get().warGoalSettings().get("skirmish").scoreCaps().get("defender").val();
 
         WarFaction targetFaction = new WarFaction(war, WarFactionRole.DEFENDER, targeSettlement.getName(), -16776961);
         targetFaction.setFactionLeaderId(targeSettlement.getUuid());

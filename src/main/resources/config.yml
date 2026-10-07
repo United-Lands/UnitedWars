@@ -21,8 +21,7 @@ mysql:
 # +---------------------------------------------+ #
 ###################################################
 
-warscheduler:
-  check-interval: 15 # in seconds
+warscheduler-check-interval: 15 # in seconds
 
 geopol-attribute-defaults:
   MOBILIZATION:
@@ -60,54 +59,53 @@ war-goal-settings:
     duration: 259200 # in seconds
     cost: 30 # mobilisation points
     war-lives: 5
-    max-attacker-mercenaries: 5
-    max-defender-mercenaries: 5
     scorecaps:
-      attacker: 10000
-      defender: 10000
+      attacker: 
+        value: 10000
+      defender: 
+        value: 10000
   revolt:
     required-rank: mayor
     warmup-time: 10 # in seconds
     duration: 259200 # in seconds
     cost: 30 # mobilisation points
     war-lives: 5
-    max-attacker-mercenaries: 5
-    max-defender-mercenaries: 5
     scorecaps:
-      attacker: 30000
-      defender: 30000
+      attacker: 
+        value: 30000
+      defender: 
+        value: 30000
   claim-dispute:
     required-rank: leader
     warmup-time: 10 # in seconds
     duration: 259200 # in seconds
     cost: 10 # mobilisation points
     war-lives: 5
-    max-attacker-mercenaries: 5
-    max-defender-mercenaries: 5
     scorecaps:
-      claimant: 30000
+      claimant: 
+        value: 30000
   conquest:
     required-rank: leader
     warmup-time: 10 # in seconds
     duration: 259200 # in seconds
     cost: 30 # mobilisation points
     war-lives: 5
-    max-attacker-mercenaries: 5
-    max-defender-mercenaries: 5
     scorecaps:
-      attacker: 40000
-      defender: 40000
+      attacker: 
+        value: 30000
+      defender: 
+        value: 30000
   subjugation:
     required-rank: leader
     warmup-time: 10 # in seconds
     duration: 259200 # in seconds
     cost: 30 # mobilisation points
     war-lives: 5
-    max-attacker-mercenaries: 5
-    max-defender-mercenaries: 5
     scorecaps:
-      attacker: 15000
-      defender: 15000
+      attacker: 
+        value: 15000
+      defender: 
+        value: 15000
 
 military-ranks:
   default: # civilian rank, players with no assigned military towny rank
@@ -151,19 +149,22 @@ siege-settings:
   # 5 attackers vs. 2 defenders = 3 player majority for attackers = 3 * health decay rate per war tick
   # If false, the health decay and restoration only apply once per team in the majority
   use-superiority-multiplier: true
-  # The starting HP of chunks at the beginning of a war (relative to max health)
-  health-start-percentage: 1.0
   # The amount of HP a chunk loses when the attackers are in a majority
   health-decay-rate: 1
   # The amount of HP a chunk heals when the defenders are in a majority
   health-restore-rate: 1
   # Initial max health points for chunk types
   chunk-max-health:
-    default: 3
-    home: 50
-    region-home: 500
-    warcamp: 100
-    fortress: 250
+    default: 
+      value: 3
+    home: 
+      value: 50
+    region-home: 
+      value: 500
+    warcamp: 
+      value: 100
+    fortress: 
+      value: 250
   # Commands that players can't use while sieges are ongoing (i.e. enemies are online)
   disabled-commands:
     - "rtp"
@@ -183,17 +184,27 @@ score-settings:
   pvp-kill:
     leader-kill-bonus-multiplier: 1.5
     rank-scores:
-      default: 0
-      militia: 10
-      soldier: 100
-      officer: 200
-      general: 500
+      default: 
+        value: 0
+      militia: 
+        value: 10
+      soldier: 
+        value: 100
+      officer: 
+        value: 200
+      general: 
+        value: 500
   chunk-capture:
-    default: 10
-    home: 500
-    region-home: 500
-    warcamp: 250
-    fortress: 250
+    default: 
+        value: 10
+    home: 
+        value: 500
+    region-home: 
+        value: 500
+    warcamp: 
+        value: 250
+    fortress: 
+        value: 250
 
 notification-settings:
   ACTIVITY:
@@ -215,12 +226,13 @@ notification-settings:
 # +---------------------------------------------+ #
 ###################################################
 
-war-book-name: "Unnamed War"
-war-book-content: "Replace this page with a brief description of your war reasons.\n\n"
-war-book-lore:
-  - ""
-  - "<yellow>Rename <gray>this book at an anvil"
-  - "<gray>to set the name of the war."
-  - "<yellow>Right-click <gray>this book to write"
-  - "<gray>your reasoning behind the <yellow>war."
-  - ""
+war-book:
+  name: "Unnamed War"
+  content: "Replace this page with a brief description of your war reasons.\n\n"
+  lore:
+    - ""
+    - "<yellow>Rename <gray>this book at an anvil"
+    - "<gray>to set the name of the war."
+    - "<yellow>Right-click <gray>this book to write"
+    - "<gray>your reasoning behind the <yellow>war."
+    - ""

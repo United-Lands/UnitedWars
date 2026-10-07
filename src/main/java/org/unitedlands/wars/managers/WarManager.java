@@ -16,20 +16,20 @@ import org.bukkit.entity.Player;
 import org.unitedlands.unitedlands.classes.Citizen;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
-import org.unitedlands.wars.classes.warcondition.LastFactionAliveContition;
-import org.unitedlands.wars.classes.warcondition.OwnAllWarZonesCondition;
-import org.unitedlands.wars.classes.warcondition.OwnMinimumWarZonesCondition;
-import org.unitedlands.wars.classes.warcondition.OwnNoWarZonesCondition;
-import org.unitedlands.wars.classes.warcondition.ReachScoreCondition;
+import org.unitedlands.wars.classes.warcondition.WarConditionLastFactionAlive;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnAllWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnMinimumWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnNoWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionReachScore;
 import org.unitedlands.wars.classes.warcondition.WarCondition;
-import org.unitedlands.wars.classes.wargoal.ClaimDisputeWarGoal;
-import org.unitedlands.wars.classes.wargoal.ConquestWarGoal;
-import org.unitedlands.wars.classes.wargoal.RevoltWarGoal;
-import org.unitedlands.wars.classes.wargoal.SkirmishWarGoal;
-import org.unitedlands.wars.classes.wargoal.SubjugationWarGoal;
+import org.unitedlands.wars.classes.wargoal.WarGoalClaimDispute;
+import org.unitedlands.wars.classes.wargoal.WarGoalConquest;
+import org.unitedlands.wars.classes.wargoal.WarGoalRevolt;
+import org.unitedlands.wars.classes.wargoal.WarGoalSkirmish;
+import org.unitedlands.wars.classes.wargoal.WarGoalSubjugation;
 import org.unitedlands.wars.classes.wargoal.WarGoal;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarEndEvent;
@@ -64,19 +64,19 @@ public class WarManager {
     }
 
     private void initializeWarGoals() {
-        warGoals.put("skirmish", new SkirmishWarGoal());
-        warGoals.put("revolt", new RevoltWarGoal());
-        warGoals.put("claim-dispute", new ClaimDisputeWarGoal());
-        warGoals.put("conquest", new ConquestWarGoal());
-        warGoals.put("subjugation", new SubjugationWarGoal());
+        warGoals.put("skirmish", new WarGoalSkirmish());
+        warGoals.put("revolt", new WarGoalRevolt());
+        warGoals.put("claim-dispute", new WarGoalClaimDispute());
+        warGoals.put("conquest", new WarGoalConquest());
+        warGoals.put("subjugation", new WarGoalSubjugation());
     }
 
     private void initializeWarConditions() {
-        warConditions.put("reach_score", new ReachScoreCondition());
-        warConditions.put("own_no_war_zones", new OwnNoWarZonesCondition());
-        warConditions.put("own_minimum_war_zones", new OwnMinimumWarZonesCondition());
-        warConditions.put("own_all_war_zones", new OwnAllWarZonesCondition());
-        warConditions.put("last_faction_alive", new LastFactionAliveContition());
+        warConditions.put("reach_score", new WarConditionReachScore());
+        warConditions.put("own_no_war_zones", new WarConditionOwnNoWarZones());
+        warConditions.put("own_minimum_war_zones", new WarConditionOwnMinimumWarZones());
+        warConditions.put("own_all_war_zones", new WarConditionOwnAllWarZones());
+        warConditions.put("last_faction_alive", new WarConditionLastFactionAlive());
     }
 
     public void loadWars() {
@@ -340,7 +340,7 @@ public class WarManager {
         if (citizen.isMayor() || citizen.isLeader())
             return true;
 
-        var ranks = UnitedWars.instance().getConfig().getConfigurationSection("military-ranks").getKeys(false);
+        var ranks = UnitedWarsConfig.get().militaryRanks().keys();
 
         var citizenRanks = (new ArrayList<>(citizen.getSettlementRanks()));
         citizenRanks.addAll(citizen.getCountryRanks());
@@ -365,9 +365,9 @@ public class WarManager {
 
     public Map<String, List<String>> getMilitaryRanks() {
         Map<String, List<String>> result = new HashMap<>();
-        var militaryRanks = UnitedWars.instance().getConfig().getConfigurationSection("military-ranks").getKeys(false);
+        var militaryRanks = UnitedWarsConfig.get().militaryRanks().keys();
         for (var configRank : militaryRanks) {
-            var level = UnitedWars.instance().getConfig().getString("military-ranks." + configRank + ".level");
+            var level = UnitedWarsConfig.get().militaryRanks().get(configRank).level();
             result.computeIfAbsent(level, v -> new ArrayList<String>()).add(configRank);
         }
         return result;

@@ -8,12 +8,10 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.war.SiegeChunk;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
@@ -100,12 +98,6 @@ public class SiegeManager {
     }
 
     private boolean createSiegeChunk(Player player, Coordinates toCoordinates) {
-
-        ConfigurationSection chunkHealthSettings = UnitedWars.instance().getConfig().getConfigurationSection("siege-settings.chunk-max-health");
-        if (chunkHealthSettings == null) {
-            United.logger().error("Couldn't find chunk health settings, aborting.", "UnitedWars");
-            return false;
-        }
 
         Set<War> playerWars = WarManager.instance().getActivePlayerWars(player);
         for (var war : playerWars) {

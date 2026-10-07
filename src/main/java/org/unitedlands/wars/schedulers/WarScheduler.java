@@ -3,6 +3,7 @@ package org.unitedlands.wars.schedulers;
 import org.bukkit.scheduler.BukkitTask;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.managers.SiegeManager;
 import org.unitedlands.wars.managers.WarEventManager;
 import org.unitedlands.wars.managers.WarManager;
@@ -23,7 +24,7 @@ public class WarScheduler {
 
     public void initialize() {
 
-        Long checkInterval = UnitedWars.instance().getConfig().getInt("warscheduler.check-interval", 15) * 20L;
+        Long checkInterval = UnitedWarsConfig.get().warSchedulerCheckInterval();
         warSchedulerTask = UnitedWars.instance().getServer().getScheduler().runTaskTimer(UnitedWars.instance(),
                 this::run, checkInterval,
                 checkInterval);

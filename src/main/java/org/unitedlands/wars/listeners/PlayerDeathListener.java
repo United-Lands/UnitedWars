@@ -21,6 +21,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarScoreType;
@@ -38,7 +39,7 @@ public class PlayerDeathListener implements Listener {
             return;
 
         var victim = event.getEntity();
-        List<String> worldBlacklist = UnitedWars.instance().getConfig().getStringList("world-blacklist");
+        List<String> worldBlacklist = UnitedWarsConfig.get().worldBlacklist();
         String world = victim.getLocation().getWorld().getName();
         if (worldBlacklist.contains(world)) {
             return;
@@ -144,10 +145,10 @@ public class PlayerDeathListener implements Listener {
 
         // Get the victim's military rank
 
-        Double killMultiplier = UnitedWars.instance().getConfig().getDouble("military-ranks." + killerRank + ".score-multiplier");
-        Double leaderBonusMultiplier = UnitedWars.instance().getConfig().getDouble("score-settings.pvp-kill.leader-kill-bonus-multiplier");
-        Integer reward = UnitedWars.instance().getConfig().getInt("score-settings.pvp-kill.rank-scores." + victimMilitaryRank);
-
+        Double killMultiplier = UnitedWarsConfig.get().militaryRanks().get(killerRank).scoreMultiplier();
+        Double leaderBonusMultiplier = UnitedWarsConfig.get().scoreSettings().pvpKills().leaderKillMultiplier();
+        Integer reward = UnitedWarsConfig.get().scoreSettings().pvpKills().rankScores().get(victimMilitaryRank).val();
+  
         // If either player is out of lives, continue
         var victimWarLives = WarMetaDataManager.instance().getWarLives(victim, sharedWar);
 

@@ -4,9 +4,9 @@ import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 
-public class RegionWarZone extends WarZone {
+public class WarZoneRegion extends WarZone {
 
-    public RegionWarZone() {
+    public WarZoneRegion() {
         this.type = "region";
     }
 

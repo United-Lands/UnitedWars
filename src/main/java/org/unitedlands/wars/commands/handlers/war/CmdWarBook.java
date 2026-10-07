@@ -12,7 +12,7 @@ import org.unitedlands.unitedlands.classes.Confirmation;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.wargoal.WarGoal;
 import org.unitedlands.wars.commands.CmdWar;
 import org.unitedlands.wars.managers.WarManager;
@@ -76,7 +76,7 @@ public class CmdWarBook implements UnitedCommandExecutor {
             return;
         }
 
-        var requiredRank = UnitedWars.instance().getConfig().getString("war-goal-settings." + args[0] + ".required-rank");
+        var requiredRank = UnitedWarsConfig.get().warGoalSettings().get(args[0]).requiredRank();
         if (requiredRank != null) {
             if (!(citizen.getSettlementRanks().contains(requiredRank) || citizen.getCountryRanks().contains(requiredRank))) {
                 United.messenger().send(sender, "player.war.book.no-rank");
@@ -142,10 +142,7 @@ public class CmdWarBook implements UnitedCommandExecutor {
 
     private void createDeclarationBook(Player player, UUID declarer, UUID target, WarGoal warGoal) {
 
-        // Integer mobilisationCost = plugin.getConfig().getInt("war-goal-settings." +
-        // warGoal.toString().toLowerCase() + ".cost", 0);
-
-        Integer mobilisationCost = 0;
+        var mobilisationCost = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId()).cost();
 
         Confirmation confirmation = new Confirmation("warbook");
         confirmation.setRunnable(() -> {

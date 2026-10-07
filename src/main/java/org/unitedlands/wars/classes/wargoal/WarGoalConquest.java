@@ -9,7 +9,7 @@ import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.unitedlands.managers.UnitedLandsEconomyManager;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
@@ -17,9 +17,9 @@ import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
 import org.unitedlands.wars.events.WarPreJoinEvent;
 
-public class ConquestWarGoal extends WarGoal {
+public class WarGoalConquest extends WarGoal {
 
-    public ConquestWarGoal() {
+    public WarGoalConquest() {
         super("conquest");
     }
 
@@ -66,7 +66,7 @@ public class ConquestWarGoal extends WarGoal {
         attackerFaction.setFactionLeaderId(country.getUuid());
         attackerFaction.addCountry(country);
 
-        var attackerScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.conquest.scorecaps.attacker", 30000);
+        var attackerScoreCap = UnitedWarsConfig.get().warGoalSettings().get("conquest").scoreCaps().get("attacker").val();
         attackerFaction.addWinCondition("reach_score", attackerScoreCap);
         attackerFaction.addWinCondition("own_all_war_zones");
         attackerFaction.addLoseCondition("own_no_war_zones");
@@ -79,7 +79,7 @@ public class ConquestWarGoal extends WarGoal {
         defenderFaction.setFactionLeaderId(targetCountry.getUuid());
         defenderFaction.addCountry(targetCountry);
 
-        var defenderScoreCap = UnitedWars.instance().getConfig().getInt("war-goal-settings.conquest.scorecaps.defender", 30000);
+        var defenderScoreCap = UnitedWarsConfig.get().warGoalSettings().get("conquest").scoreCaps().get("defender").val();
         defenderFaction.addWinCondition("reach_score", defenderScoreCap);
         defenderFaction.addWinCondition("own_all_war_zones");
         defenderFaction.addLoseCondition("own_no_war_zones");
