@@ -35,6 +35,8 @@ public class CmdWarMercenaryAdd implements UnitedCommandExecutor {
                 }
                 return playerFactions.stream().map(WarFaction::getName).toList();
             }
+        } else if (args.length == 2) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         }
         return null;
     }

@@ -74,7 +74,7 @@ public class SiegeManager {
     }
 
     public void updatePlayersInChunk(Player player, Coordinates fromCoordinates, Coordinates toCoordinates) {
-        
+
         // TODO: Reactivate!!
 
         // if (player.getGameMode() != GameMode.SURVIVAL)
@@ -161,9 +161,7 @@ public class SiegeManager {
 
     public void cleanupSiegeChunks(War war) {
 
-        Set<SiegeChunk> warSiegeChunks = siegeChunks.values().stream()
-            .filter(c -> c.getWar().equals(war))
-            .collect(Collectors.toSet());
+        Set<SiegeChunk> warSiegeChunks = siegeChunks.values().stream().filter(c -> c.getWar().equals(war)).collect(Collectors.toSet());
 
         for (var siegeChunk : warSiegeChunks) {
 

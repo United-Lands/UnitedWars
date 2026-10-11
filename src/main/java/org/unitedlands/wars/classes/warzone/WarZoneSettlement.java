@@ -2,10 +2,15 @@ package org.unitedlands.wars.classes.warzone;
 
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.unitedlands.classes.SettlementChunk;
+import org.unitedlands.unitedlands.integrations.Pl3xMap.Pl3xMapRenderer;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
+import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 
 public class WarZoneSettlement extends WarZone {
 
@@ -22,13 +27,13 @@ public class WarZoneSettlement extends WarZone {
     public void generateAreas() {
 
         if (getGeopolObjectId() == null) {
-            United.logger().error("No GeopolObject id found, cannot generate war zone area for " + getUuid(), "UnitedLands");
+            United.logger().error("No GeopolObject id found, cannot generate war zone area for " + getUuid());
             return;
         }
 
         var settlement = UnitedLandsDataManager.instance().getSettlement(getGeopolObjectId());
         if (settlement == null) {
-            United.logger().error("Could not find settlement with id " + getGeopolObjectId() + " for war zone " + getUuid(), "UnitedLands");
+            United.logger().error("Could not find settlement with id " + getGeopolObjectId() + " for war zone " + getUuid());
             return;
         }
 
@@ -59,5 +64,39 @@ public class WarZoneSettlement extends WarZone {
         }
 
     }
+
+    public void renderMarkers() {
+
+        if (!UnitedWarsConfig.get().siegeSettings().captureMarkers().use())
+            return;
+
+        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
+        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
+
+        Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
+            var marker = "siege";
+            for (var chunk : captureArea) {
+                if ("home".equals(chunk.type()))
+                    marker = "home";
+                else if ("fortress".equals(chunk.type()))
+                    marker = "fortress";
+                var location = new Location(chunk.coords().getWorld(), chunk.coords().getX() * 16 + 8, 0, chunk.coords().getZ() * 16 + 8);
+                Pl3xMapRenderer.instance().renderMarker(location.getWorld().getName(), location, marker, getMarkerKey(chunk.coords()), layerKey, layerName);
+            }
+        });
+    }
+
+    public void removeMarkers() {
+
+        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
+        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
+
+        Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
+            for (var chunk : captureArea) {
+                Pl3xMapRenderer.instance().removeMarker(chunk.coords().getWorld().getName(), getMarkerKey(chunk.coords()), layerKey, layerName);
+            }
+        });
+    }
+
 
 }

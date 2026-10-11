@@ -11,6 +11,7 @@ import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.warzone.WarZoneRegion;
 import org.unitedlands.wars.classes.warzone.WarZoneSettlement;
+import org.unitedlands.wars.classes.warzone.WarZoneWarcamp;
 import org.unitedlands.wars.classes.warzone.WarZone;
 
 public abstract class WarGoal {
@@ -18,7 +19,8 @@ public abstract class WarGoal {
     private final String id;
     protected String description;
 
-    public static record ValidationResult(boolean valid, String message) {}
+    public static record ValidationResult(boolean valid, String message) {
+    }
 
     public WarGoal(String id) {
         this.id = id;
@@ -34,7 +36,7 @@ public abstract class WarGoal {
 
     public abstract void resolve(War war);
 
-    protected WarZone createSettlementZone(War war, WarFaction owningFaction, Settlement settlement) {
+    public WarZone createSettlementZone(War war, WarFaction owningFaction, Settlement settlement) {
         var settlementZone = new WarZoneSettlement();
         settlementZone.setUuid(UUID.randomUUID());
         settlementZone.setWar(war);
@@ -47,7 +49,7 @@ public abstract class WarGoal {
         return settlementZone;
     }
 
-    protected WarZone createRegionZone(War war, WarFaction owningFaction, Region region) {
+    public WarZone createRegionZone(War war, WarFaction owningFaction, Region region) {
         var regionZone = new WarZoneRegion();
         regionZone.setUuid(UUID.randomUUID());
         regionZone.setWar(war);
@@ -58,6 +60,18 @@ public abstract class WarGoal {
         }
         regionZone.generateAreas();
         return regionZone;
+    }
+
+    public WarZone createWarcampZone(War war, WarFaction owningFaction) {
+        var warcampZone = new WarZoneWarcamp();
+        warcampZone.setUuid(UUID.randomUUID());
+        warcampZone.setWar(war);
+        if (owningFaction != null) {
+            warcampZone.setFaction(owningFaction);
+            warcampZone.setOccupier(owningFaction);
+        }
+        warcampZone.generateAreas();
+        return warcampZone;
     }
 
     public String getId() {

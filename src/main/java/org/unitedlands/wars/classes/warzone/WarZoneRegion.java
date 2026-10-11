@@ -1,8 +1,13 @@
 package org.unitedlands.wars.classes.warzone;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.unitedlands.unitedlands.classes.Coordinates;
+import org.unitedlands.unitedlands.integrations.Pl3xMap.Pl3xMapRenderer;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
+import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 
 public class WarZoneRegion extends WarZone {
 
@@ -19,7 +24,7 @@ public class WarZoneRegion extends WarZone {
     public void generateAreas() {
 
         if (getGeopolObjectId() == null) {
-            United.logger().error("No GeopolObject id found, cannot generate war zone area for " + getUuid(), "UnitedLands");
+            United.logger().error("No GeopolObject id found, cannot generate war zone area for " + getUuid());
             return;
         }
 
@@ -47,68 +52,37 @@ public class WarZoneRegion extends WarZone {
 
     }
 
-    // public void createMarker(Location beaconLoc, Material mineral) {
-    //     World world = beaconLoc.getWorld();
-    //     int cx = beaconLoc.getBlockX();
-    //     int cy = beaconLoc.getBlockY();
-    //     int cz = beaconLoc.getBlockZ();
+    @Override 
+    public void renderMarkers() {
 
-    //     int minX = cx - 2, maxX = cx + 2;
-    //     int minY = cy - 1, maxY = cy + 4;
-    //     int minZ = cz - 2, maxZ = cz + 2;
+        if (!UnitedWarsConfig.get().siegeSettings().captureMarkers().use())
+            return;
 
-    //     for (int x = cx - 1; x <= cx + 1; x++) {
-    //         for (int z = cz - 1; z <= cz + 1; z++) {
-    //             setBlock(world, x, cy - 1, z, mineral);
-    //         }
-    //     }
+        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
+        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
 
-    //     setBlock(world, cx, cy, cz, Material.BEACON);
+        Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
+            var marker = "siege";
+            for (var chunk : captureArea) {
+                if ("region-home".equals(chunk.type()))
+                    marker = "home";
+                var location = new Location(chunk.coords().getWorld(), chunk.coords().getX() * 16 + 8, 0, chunk.coords().getZ() * 16 + 8);
+                Pl3xMapRenderer.instance().renderMarker(location.getWorld().getName(), location, marker, getMarkerKey(chunk.coords()), layerKey, layerName);
+            }
+        });
+    }
 
-    //     for (int y = cy + 1; y < maxY; y++) {
-    //         setBlock(world, cx, y, cz, Material.AIR);
-    //     }
+    @Override 
+    public void removeMarkers() {
 
-    //     for (int x = minX; x <= maxX; x++) {
-    //         for (int y = minY; y <= maxY; y++) {
-    //             for (int z = minZ; z <= maxZ; z++) {
-    //                 boolean isShell = (x == minX || x == maxX
-    //                         || y == minY || y == maxY
-    //                         || z == minZ || z == maxZ);
-    //                 if (!isShell)
-    //                     continue;
+        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
+        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
 
-    //                 if (x == cx && y == cy && z == cz)
-    //                     continue;
-    //                 if (y == cy - 1 && Math.abs(x - cx) <= 1 && Math.abs(z - cz) <= 1)
-    //                     continue;
+        Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
+            for (var chunk : captureArea) {
+                Pl3xMapRenderer.instance().removeMarker(chunk.coords().getWorld().getName(), getMarkerKey(chunk.coords()), layerKey, layerName);
+            }
+        });
+    }
 
-    //                 setBlock(world, x, y, z, Material.BARRIER);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // private static void setBlock(World world, int x, int y, int z, Material type) {
-    //     Block block = world.getBlockAt(x, y, z);
-    //     block.setType(type, false);
-    // }
-
-    // public static void removeMarker(Location beaconLoc) {
-
-    //     World world = beaconLoc.getWorld();
-    //     int cx = beaconLoc.getBlockX();
-    //     int cy = beaconLoc.getBlockY();
-    //     int cz = beaconLoc.getBlockZ();
-    //     int radius = 2;
-    //     int cageHeight = 4;
-
-    //     for (int x = cx - radius; x <= cx + radius; x++) {
-    //         for (int y = cy - 1; y <= cy + cageHeight; y++) {
-    //             for (int z = cz - radius; z <= cz + radius; z++) {
-    //                 world.getBlockAt(x, y, z).setType(Material.AIR, false);
-    //             }
-    //         }
-    //     }
-    // }
 }

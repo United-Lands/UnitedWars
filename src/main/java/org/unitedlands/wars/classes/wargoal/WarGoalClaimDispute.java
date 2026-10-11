@@ -55,7 +55,7 @@ public class WarGoalClaimDispute extends WarGoal {
         var country = (Country) declarer;
         var region = (Region) target;
         if (country == null || region == null) {
-            United.logger().error("Unable to create claim dispute factions, missing declarer or target object.", "UnitedLands");
+            United.logger().error("Unable to create claim dispute factions, missing declarer or target object.");
             return null;
         }
 

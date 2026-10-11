@@ -15,7 +15,6 @@ import org.unitedlands.wars.listeners.UnitedLands.UnitedLandsMovementListener;
 import org.unitedlands.wars.managers.DatabaseManager;
 import org.unitedlands.wars.managers.SiegeChunkDisplayManager;
 import org.unitedlands.wars.managers.SiegeManager;
-import org.unitedlands.wars.managers.WarEventManager;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.managers.WarMetaDataManager;
 import org.unitedlands.wars.schedulers.WarScheduler;
@@ -60,7 +59,6 @@ public class UnitedWars extends JavaPlugin {
         new WarManager(databaseManager);
         new SiegeManager(databaseManager);
         new SiegeChunkDisplayManager();
-        new WarEventManager();
         new WarMetaDataManager();
         new WarScheduler();
     }

@@ -37,7 +37,7 @@ public class WarZone implements Identifiable {
 
     @DatabaseField(canBeNull = false)
     protected String type;
-    @DatabaseField(width = 36, canBeNull = false)
+    @DatabaseField(width = 36, canBeNull = true)
     protected UUID geopolObjectId;
 
     @DatabaseField(width = 36, canBeNull = false, columnName = "war_id")
@@ -205,6 +205,9 @@ public class WarZone implements Identifiable {
         if (this.isOccupied)
             return;
 
+        if (captureArea.size() == 0)
+            return;
+
         boolean allChunksCaptured = true;
         Map<WarFaction, Integer> occupiers = new HashMap<>();
         for (var chunk : captureArea) {
@@ -252,35 +255,10 @@ public class WarZone implements Identifiable {
 
     public void renderMarkers() {
 
-        if (!UnitedWarsConfig.get().siegeSettings().captureMarkers().use())
-            return;
-
-        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
-        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
-  
-        Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
-            var marker = "siege";
-            for (var chunk : captureArea) {
-                if ("home".equals(chunk.type()) || "region-home".equals(chunk.type()))
-                    marker = "home";
-                else if ("fortress".equals(chunk.type()))
-                    marker = "fortress";
-                var location = new Location(chunk.coords().getWorld(), chunk.coords().getX() * 16 + 8, 0, chunk.coords().getZ() * 16 + 8);
-                Pl3xMapRenderer.instance().renderMarker(location.getWorld().getName(), location, marker, getMarkerKey(chunk.coords()), layerKey, layerName);
-            }
-        });
     }
 
     public void removeMarkers() {
 
-        var layerKey = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerKey();
-        var layerName = UnitedWarsConfig.get().siegeSettings().captureMarkers().layerName();
-  
-        Bukkit.getScheduler().runTaskAsynchronously(UnitedWars.instance(), () -> {
-            for (var chunk : captureArea) {
-                Pl3xMapRenderer.instance().removeMarker(chunk.coords.getWorld().getName(), getMarkerKey(chunk.coords()), layerKey, layerName);
-            }
-        });
     }
 
     public void backupGriefZone() {
@@ -316,7 +294,7 @@ public class WarZone implements Identifiable {
         }
     }
 
-    private String getMarkerKey(Coordinates coords) {
+    protected String getMarkerKey(Coordinates coords) {
         return "marker-" + this.uuid + "-" + coords.getX() + "-" + coords.getZ();
     }
 
@@ -338,6 +316,18 @@ public class WarZone implements Identifiable {
         var regionWarZone = new WarZoneRegion();
         regionWarZone.setUuid(this.uuid);
         regionWarZone.setGeopolObjectId(this.geopolObjectId);
+        regionWarZone.setWarId(this.warId);
+        regionWarZone.setFactionId(this.factionId);
+        regionWarZone.setOccupierId(this.occupierId);
+        regionWarZone.setOccupied(this.isOccupied);
+
+        return regionWarZone;
+    }
+
+    public WarZoneWarcamp asWarcampWarZone() {
+
+        var regionWarZone = new WarZoneWarcamp();
+        regionWarZone.setUuid(this.uuid);
         regionWarZone.setWarId(this.warId);
         regionWarZone.setFactionId(this.factionId);
         regionWarZone.setOccupierId(this.occupierId);

@@ -18,14 +18,7 @@ import org.unitedlands.wars.commands.CmdWar;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.WarBookUtils;
 
-@UnitedSubCommand(
-    parent          = CmdWar.class, 
-    name            = "book", 
-    description     = "Creates a new war book", 
-    usage           = "/war book <war_goal> [target_name]", 
-    catchAll        = true, 
-    playerOnly      = true
-)
+@UnitedSubCommand(parent = CmdWar.class, name = "book", description = "Creates a new war book", usage = "/war book <war_goal> [target_name]", catchAll = true, playerOnly = true)
 public class CmdWarBook implements UnitedCommandExecutor {
 
     @Override
@@ -134,7 +127,16 @@ public class CmdWarBook implements UnitedCommandExecutor {
             return;
         }
 
-        // TODO: Mobilisation check
+        var cost = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId()).cost();
+        var mobilisation = declarer.getAttribute("MOBILIZATION");
+        if (mobilisation.getCurrentValue() < cost) {
+            United.messenger().send(sender, "player.war.book.cost-too-high", validationResult.message());
+            return;
+        }
+
+        mobilisation.setCurrentValue(mobilisation.getCurrentValue() - cost);
+        declarer.addAttribute(requiredRank, mobilisation);
+        declarer.save();
 
         createDeclarationBook(player, declarer.getUuid(), target.getUuid(), warGoal);
 

@@ -35,7 +35,7 @@ public class UnitedLandsCountryListener implements Listener {
             var targetCountry = region.getClaimantCountry();
 
             if (targetCountry == null) {
-                United.logger().warning("No claimant country for double claim event.", "UnitedLands");
+                United.logger().warning("No claimant country for double claim event.");
                 return;
             }
 

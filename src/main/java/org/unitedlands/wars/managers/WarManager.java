@@ -36,6 +36,7 @@ import org.unitedlands.wars.events.WarEndEvent;
 import org.unitedlands.wars.events.WarPreRegisterEvent;
 import org.unitedlands.wars.events.WarRegisteredEvent;
 import org.unitedlands.wars.events.WarStartEvent;
+import org.unitedlands.wars.utils.WarcampUtils;
 
 public class WarManager {
 
@@ -130,7 +131,7 @@ public class WarManager {
                 // Faction belongs to an ended war
                 continue;
             }
-            warFactions.put(faction.getUuid(), faction);
+            addWarFaction(faction);
         }
         United.logger().info("Loaded " + loadedWarFactions.size() + " war faction(s) from the database.", "UnitedWars");
     }
@@ -149,19 +150,27 @@ public class WarManager {
                 settlementZone.generateAreas();
                 if (war.isActive())
                     zone.renderMarkers();
-                warZones.put(zone.getUuid(), settlementZone);
+                addWarZone(settlementZone);
                 break;
             case "region":
                 var regionZone = zone.asRegiontWarZone();
                 regionZone.generateAreas();
                 if (war.isActive())
                     regionZone.renderMarkers();
-                warZones.put(zone.getUuid(), regionZone);
+                addWarZone(regionZone);
+                break;
+            case "warcamp":
+                var warcampZone = zone.asWarcampWarZone();
+                warcampZone.generateAreas();
+                if (war.isActive())
+                    warcampZone.renderMarkers();
+                addWarZone(warcampZone);
                 break;
             }
 
         }
         United.logger().info("Loaded " + loadedWarZones.size() + " war zone(s) from the database.", "UnitedWars");
+
     }
 
     public void handleWars() {
@@ -243,14 +252,16 @@ public class WarManager {
 
         // Cache war factions and war zones
         for (var faction : war.getWarFactions())
-            warFactions.put(faction.getUuid(), faction);
+            addWarFaction(faction);
         for (var zone : war.getWarZones())
-            warZones.put(zone.getUuid(), zone);
+            addWarZone(zone);
 
         // Create database records
         databaseManager.getWarFactionService().createAllAsync(war.getWarFactions());
         databaseManager.getWarZoneService().createAllAsync(war.getWarZones());
         databaseManager.getWarService().createAsync(war);
+
+        war.refreshOnlinePlayerFactions();
 
         WarRegisteredEvent warRegisteredEvent = new WarRegisteredEvent(war);
         warRegisteredEvent.callEvent();
@@ -283,11 +294,19 @@ public class WarManager {
 
         SiegeManager.instance().cleanupSiegeChunks(war);
 
-        // Clear cache for war factions and war zones
-        for (var faction : war.getWarFactions())
+        // Clear cache and database for war factions and war zones
+        for (var faction : war.getWarFactions()) {
+
+            if (faction.getWarCampLocation() != null)
+                WarcampUtils.removeWarcamp(faction.getWarCampLocation().getChunk());
+
             warFactions.remove(faction.getUuid());
-        for (var zone : war.getWarZones())
+            databaseManager.getWarFactionService().deleteAsync(faction);
+        }
+        for (var zone : war.getWarZones()) {
             warZones.remove(zone.getUuid());
+            databaseManager.getWarZoneService().deleteAsync(zone);
+        }
 
         // Restore griefable areas
         for (var warZone : war.getWarZones()) {
@@ -313,6 +332,20 @@ public class WarManager {
 
     public boolean anyWarsActive() {
         return activeWars.size() > 0;
+    }
+
+    public void refreshCache() {
+
+        warZones = new HashMap<>();
+        warFactions = new HashMap<>();
+
+        for (var war : getWars()) {
+            for (var faction : war.getWarFactions())
+                addWarFaction(faction);
+            for (var zone : war.getWarZones())
+                addWarZone(zone);
+        }
+        
     }
 
     public void validateMetaData(Player player) {
@@ -344,7 +377,7 @@ public class WarManager {
 
         var citizenRanks = (new ArrayList<>(citizen.getSettlementRanks()));
         citizenRanks.addAll(citizen.getCountryRanks());
-        
+
         var intersection = new ArrayList<String>(citizenRanks);
         intersection.retainAll(ranks);
         return intersection.size() > 0;
@@ -431,6 +464,14 @@ public class WarManager {
         return titles;
     }
 
+    public void addWarFaction(WarFaction faction) {
+        warFactions.put(faction.getUuid(), faction);
+    }
+
+    public void removeWarFaction(WarFaction faction) {
+        warFactions.remove(faction.getUuid());
+    }
+
     public List<String> getWarFactionNames() {
         return warFactions.values().stream().map(WarFaction::getName).toList();
     }
@@ -441,6 +482,14 @@ public class WarManager {
 
     public WarFaction getWarFaction(String name) {
         return warFactions.values().stream().filter(f -> name.equals(f.getName())).findFirst().orElse(null);
+    }
+
+    public void addWarZone(WarZone warZone) {
+        warZones.put(warZone.getUuid(), warZone);
+    }
+
+    public void removeWarZone(WarZone warZone) {
+        warZones.remove(warZone.getUuid());
     }
 
     public WarZone getWarZone(UUID id) {

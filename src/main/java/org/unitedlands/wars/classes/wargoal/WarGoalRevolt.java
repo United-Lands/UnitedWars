@@ -2,8 +2,6 @@ package org.unitedlands.wars.classes.wargoal;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
@@ -70,14 +68,9 @@ public class WarGoalRevolt extends WarGoal {
 
         var declarerScoreCap = UnitedWarsConfig.get().warGoalSettings().get("revolt").scoreCaps().get("attacker").val();
 
-        WarFaction declarerFaction = new WarFaction();
-        declarerFaction.setUuid(UUID.randomUUID());
-        declarerFaction.setName("Rebels");
-        declarerFaction.setColor(-65536);
-        declarerFaction.setRole(WarFactionRole.ATTACKER);
+        WarFaction declarerFaction = new WarFaction(war, WarFactionRole.ATTACKER, "Rebels", -65536);
         declarerFaction.setFactionLeaderId(declaringSettlement.getUuid());
         declarerFaction.addSettlement(declaringSettlement);
-        declarerFaction.setWar(war);
         declarerFaction.addWinCondition("reach_score", declarerScoreCap);
         declarerFaction.addWinCondition("own_all_war_zones");
         declarerFaction.addLoseCondition("own_no_war_zones");
@@ -88,20 +81,15 @@ public class WarGoalRevolt extends WarGoal {
 
         var targetCountry = targetRegion.getCountry();
         if (targetCountry == null) {
-            United.logger().error("Unable to create revolt factions, missing target country.", "UnitedLands");
+            United.logger().error("Unable to create revolt factions, missing target country.");
             return null;
         }
 
         var targetScoreCap = UnitedWarsConfig.get().warGoalSettings().get("revolt").scoreCaps().get("defender").val();
 
-        WarFaction targetFaction = new WarFaction();
-        targetFaction.setUuid(UUID.randomUUID());
-        targetFaction.setName("Loyalist");
-        targetFaction.setColor(-16776961);
-        targetFaction.setRole(WarFactionRole.DEFENDER);
+        WarFaction targetFaction = new WarFaction(war, WarFactionRole.DEFENDER, "Loyalist", -16776961); 
         targetFaction.setFactionLeaderId(targetCountry.getUuid());
         targetFaction.addCountry(targetCountry);
-        targetFaction.setWar(war);
         targetFaction.addWinCondition("reach_score", targetScoreCap);
         targetFaction.addWinCondition("last_faction_alive");
         targetFaction.addWinCondition("own_all_war_zones");
@@ -133,19 +121,19 @@ public class WarGoalRevolt extends WarGoal {
 
         var attackerFactions = war.getWarFactionMap().get(WarFactionRole.ATTACKER);
         if (attackerFactions.size() != 1) {
-            United.logger().error("Unexpected number of factions in revolt war goal resolution.", "UnitedLands");
+            United.logger().error("Unexpected number of factions in revolt war goal resolution.");
             return;
         } else {
 
             var attackingSettlement = UnitedLandsDataManager.instance().getSettlement(attackerFactions.getFirst().getFactionLeaderId());
             if (attackingSettlement == null) {
-                United.logger().error("No declaring settlement found in revolt war goal resolution.", "UnitedLands");
+                United.logger().error("No declaring settlement found in revolt war goal resolution.");
                 return;
             }
 
             var region = attackingSettlement.getRegion();
             if (region == null || !region.hasCountry()) {
-                United.logger().error("No region or region country found in revolt war goal resolution.", "UnitedLands");
+                United.logger().error("No region or region country found in revolt war goal resolution.");
                 return;
             }
 

@@ -5,7 +5,6 @@ import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.managers.SiegeManager;
-import org.unitedlands.wars.managers.WarEventManager;
 import org.unitedlands.wars.managers.WarManager;
 
 public class WarScheduler {
@@ -24,7 +23,7 @@ public class WarScheduler {
 
     public void initialize() {
 
-        Long checkInterval = UnitedWarsConfig.get().warSchedulerCheckInterval();
+        Long checkInterval = UnitedWarsConfig.get().warSchedulerCheckInterval() * 20l;
         warSchedulerTask = UnitedWars.instance().getServer().getScheduler().runTaskTimer(UnitedWars.instance(),
                 this::run, checkInterval,
                 checkInterval);
@@ -36,8 +35,6 @@ public class WarScheduler {
     public void run() {
         WarManager.instance().handleWars();
         WarManager.instance().updateTownImmunities();
-        WarEventManager.instance().handleEvents();
-        SiegeManager.instance().updateSieges();
         SiegeManager.instance().handleSiegeChunks();
     }
 

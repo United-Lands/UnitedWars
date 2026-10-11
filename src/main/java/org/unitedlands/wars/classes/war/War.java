@@ -25,6 +25,7 @@ import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.wargoal.WarGoal;
 import org.unitedlands.wars.classes.warzone.WarZone;
+import org.unitedlands.wars.classes.warzone.WarZoneWarcamp;
 import org.unitedlands.wars.events.WarScoreEvent;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.managers.WarMetaDataManager;
@@ -312,6 +313,21 @@ public class War implements Identifiable {
         return war;
     }
 
+    public WarZone createWarcamp(WarFaction faction) {
+        var warcampZone = getWarGoal().createWarcampZone(this, faction);
+        addWarZone(warcampZone);
+
+        return warcampZone;
+    }
+
+    public WarZone getWarcamp(WarFaction faction) {
+        return getWarZones().stream().filter(z -> z instanceof WarZoneWarcamp && z.getFaction().equals(faction)).findAny().orElse(null);
+    }
+
+    public void removeWarcamp(WarZone zone) {
+        removeWarZone(zone);
+    }
+
     public boolean canBeStarted() {
         var currentTime = System.currentTimeMillis();
         if (scheduledBeginTime <= currentTime && scheduledEndTime >= currentTime && !active) {
@@ -393,7 +409,8 @@ public class War implements Identifiable {
         if (winners.size() == 1) {
             // Exactly one faction won
             setWinningFaction(winners.get(0));
-            // Set winning condition, if one was met. If there is none, they won by highest score.
+            // Set winning condition, if one was met. If there is none, they won by highest
+            // score.
             if (winningConditions.size() != 0) {
                 setWinningCondition(winningConditions.get(0));
             }
@@ -428,7 +445,7 @@ public class War implements Identifiable {
 
             var citizen = UnitedLandsDataManager.instance().getCitizen(player);
             if (citizen == null) {
-                United.logger().warning("Could not get citizen data of player " + player.getUniqueId(), "UnitedLands");
+                United.logger().warning("Could not get citizen data of player " + player.getUniqueId());
                 continue;
             }
 
@@ -461,8 +478,13 @@ public class War implements Identifiable {
             var playerChunkCoords = CoordinateUtils.locationToChunkCoordinates(playerFactionEntry.getKey().getLocation());
             var warZone = WarManager.instance().getWarZone(playerChunkCoords);
 
-            // Only award activity points if a player is in a war zone and that war zone does NOT belong to the player's faction
-            if (warZone == null || playerFactionEntry.getValue().equals(warZone.getFaction()))
+            // Only award activity points if a player is in a war zone and that war zone
+            // does NOT belong to the player's faction
+            if (warZone == null)
+                continue;
+            if (warZone.isOccupied() && playerFactionEntry.getValue().equals(warZone.getOccupier()))
+                continue;
+            if (!warZone.isOccupied() && playerFactionEntry.getValue().equals(warZone.getFaction()))
                 continue;
 
             var activityScoreEvent = new WarScoreEvent(this, playerFactionEntry.getKey(), playerFactionEntry.getValue(), WarScoreType.ACTIVITY, activityPoints);
@@ -546,19 +568,6 @@ public class War implements Identifiable {
 
     public WarZone getWarZoneForChunk(Coordinates coords) {
         return getWarZones().stream().filter(z -> z.isInArea(coords)).findFirst().orElse(null);
-    }
-
-    public Map<String, String> getMessageReplacements() {
-
-        Map<String, String> replacements = new HashMap<>(Map.of("war-title", getCleanTitle(), "war-description", getDescription(), "timer-length",
-                United.formatter().formatDuration(getScheduledEndTime() - getScheduledBeginTime()), "timer-to-start",
-                United.formatter().formatDuration(getScheduledBeginTime() - System.currentTimeMillis()), "timer-to-end",
-                United.formatter().formatDuration(getScheduledEndTime() - System.currentTimeMillis())));
-
-        if (getWarGoal() != null) {
-            replacements.putAll(getWarGoal().getMessageReplacements());
-        }
-        return replacements;
     }
 
     @Override

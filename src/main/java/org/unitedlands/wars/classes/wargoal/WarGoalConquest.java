@@ -57,7 +57,7 @@ public class WarGoalConquest extends WarGoal {
         var country = (Country) declarer;
         var region = (Region) target;
         if (country == null || region == null) {
-            United.logger().error("Unable to create conquest factions, missing declarer or target object.", "UnitedLands");
+            United.logger().error("Unable to create conquest factions, missing declarer or target object.");
             return null;
         }
 

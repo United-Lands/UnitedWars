@@ -12,6 +12,7 @@ import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.managers.SiegeManager;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.schedulers.WarScheduler;
 import org.unitedlands.wars.utils.WarBookUtils;
@@ -35,6 +36,7 @@ public class ServerEventListener implements Listener {
         if (!WarManager.instance().anyWarsPending() && !WarManager.instance().anyWarsActive())
             return;
         WarManager.instance().updatePlayerLists();
+        SiegeManager.instance().updateSieges();
     }
 
     @EventHandler
@@ -45,6 +47,7 @@ public class ServerEventListener implements Listener {
         // Delay by one tick so the quitting player is actually considered offline
         Bukkit.getScheduler().runTaskLater(UnitedWars.instance(), () -> {
             WarManager.instance().updatePlayerLists();
+            SiegeManager.instance().updateSieges();
         }, 1);
     }
 

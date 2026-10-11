@@ -13,6 +13,7 @@ import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.warzone.WarZone;
+import org.unitedlands.wars.classes.warzone.WarZoneWarcamp;
 import org.unitedlands.wars.events.SiegeChunkHealthChangeEvent;
 import org.unitedlands.wars.events.WarScoreEvent;
 import org.unitedlands.wars.managers.WarManager;
@@ -230,6 +231,11 @@ public class SiegeChunk implements Identifiable {
             var captureAreaChunk = warZone.getCaptureAreaChunk(coordinates);
             chunkType = captureAreaChunk.type();
             occupiable = captureAreaChunk.occupiable();
+        }
+        // War camps might have special HP settings
+        if (warZone instanceof WarZoneWarcamp) {
+            chunkType = "warcamp";
+            occupiable = false;
         }
 
         if (chunkHealthSettings.has(chunkType)) {

@@ -6,6 +6,7 @@ import org.unitedlands.registrars.command.UnitedCommandExecutor;
 import org.unitedlands.registrars.messages.UnitedMessagesRegistrar;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.commands.CmdWarAdmin;
 import org.unitedlands.wars.schedulers.WarScheduler;
 
@@ -24,6 +25,7 @@ public class CmdWarAdminReload implements UnitedCommandExecutor {
         WarScheduler.instance().shutdown();
 
         UnitedWars.instance().reloadConfig();
+        UnitedWarsConfig.get().reload();
         UnitedMessagesRegistrar.reload(UnitedWars.instance());
 
         WarScheduler.instance().initialize();

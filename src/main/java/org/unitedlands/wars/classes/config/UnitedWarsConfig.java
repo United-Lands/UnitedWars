@@ -64,7 +64,7 @@ public interface UnitedWarsConfig extends UnitedConfigHandler  {
     SiegeSettings siegeSettings();
 
     record SiegeSettings(
-        @UnitedSetting(key = "capture-markers",                 def = "")       CaptureMarkerSettings   captureMarkers,
+        @UnitedSection(key = "capture-markers")                                 CaptureMarkerSettings   captureMarkers,
         @UnitedSetting(key = "warcamp-templates",               def = "5")      int                     warcampTemplates,
         @UnitedSetting(key = "override-activity-requirement",   def = "false")  boolean                 overrideActivityRequirement,
         @UnitedSetting(key = "require-siege-from-border",       def = "true")   boolean                 requireSiegeFromBorder,
@@ -93,7 +93,7 @@ public interface UnitedWarsConfig extends UnitedConfigHandler  {
 
     record ScoreSettings(
         @UnitedSetting(key = "activity",        def = "1")  int                                             activity,
-        @UnitedSetting(key = "pvp-kill",        def = "")   PvpKillScoreSettings                             pvpKills,
+        @UnitedSection(key = "pvp-kill")                    PvpKillScoreSettings                             pvpKills,
         @UnitedSection(key = "chunk-capture")               UnitedDynamicSection<GeneralIntValueSetting>    chunkCapture
 
     ) { }

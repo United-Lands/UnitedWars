@@ -9,6 +9,7 @@ import org.unitedlands.unitedlands.classes.Citizen;
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.unitedlands.classes.db.Identifiable;
+import org.bukkit.Location;
 import org.unitedlands.libs.ormlite.field.DataType;
 import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
@@ -54,6 +55,9 @@ public class WarFaction implements Identifiable {
     private String loseConditionsSerialized;
     private transient Map<String, Integer> loseConditions;
 
+    @DatabaseField(columnName = "warcamp_location_serialized")
+    private String warcampLocationSerialized;
+
     @DatabaseField
     private String name;
     @DatabaseField
@@ -66,10 +70,12 @@ public class WarFaction implements Identifiable {
 
     private boolean stateChanged;
 
+    private Location warCampLocation;
+
     public WarFaction() {
 
     }
-
+    
     public WarFaction(War war, WarFactionRole role, String name, int color) {
         this.uuid = UUID.randomUUID();
         this.war = war;
@@ -177,8 +183,6 @@ public class WarFaction implements Identifiable {
     public boolean hasMercenary(Citizen mercenary) {
         return getMercenaries().contains(mercenary);
     }
-
-
 
     public void addMercenary(Citizen mercenary) {
         var c = new HashSet<>(getMercenaries());
@@ -340,6 +344,22 @@ public class WarFaction implements Identifiable {
     public void setLost(boolean lost) {
         this.lost = lost;
         this.stateChanged = true;
+    }
+
+    public Location getWarCampLocation() {
+        if (warCampLocation == null && warcampLocationSerialized != null)
+            this.warCampLocation = SerializationUtils.deserializeLocation(warcampLocationSerialized);
+        return warCampLocation;
+    }
+
+    public void setWarCampLocation(Location warCampLocation) {
+        this.warCampLocation = warCampLocation;
+        this.warcampLocationSerialized = SerializationUtils.serializeLocation(warCampLocation);
+    }
+
+    public void removeWarCampLocation() {
+        this.warCampLocation = null;
+        this.warcampLocationSerialized = null;
     }
 
     public boolean isFactionLeader(UUID playerId) {
