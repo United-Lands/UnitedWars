@@ -8,17 +8,20 @@ import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.events.region.RegionClaimedEvent;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnAllWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionReachScore;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
 
 public class WarGoalClaimDispute extends WarGoal {
 
+    public static final String ID = "claim-dispute";
+
     public WarGoalClaimDispute() {
-        super("claim-dispute");
+        super(ID);
     }
 
     @Override
@@ -60,13 +63,13 @@ public class WarGoalClaimDispute extends WarGoal {
             return null;
         }
 
-        var claimantScoreCap = UnitedWarsConfig.get().warGoalSettings().get("claim-dispute").scoreCaps().get("claimant").val();
+        var claimantScoreCap = getScoreCap("claimant");
 
         WarFaction faction1 = new WarFaction(war, WarFactionRole.CLAIMANT, country.getName(), -65536);
         faction1.setFactionLeaderId(country.getUuid());
         faction1.addCountry(country);
-        faction1.addWinCondition("reach_score", claimantScoreCap);
-        faction1.addWinCondition("own_all_war_zones");
+        faction1.addWinCondition(WarConditionReachScore.ID, claimantScoreCap);
+        faction1.addWinCondition(WarConditionOwnAllWarZones.ID);
 
         factions.add(faction1);
 
@@ -75,8 +78,8 @@ public class WarGoalClaimDispute extends WarGoal {
         WarFaction faction2 = new WarFaction(war, WarFactionRole.CLAIMANT, targetCountry.getName(), -16776961);
         faction2.setFactionLeaderId(targetCountry.getUuid());
         faction2.addCountry(targetCountry);
-        faction2.addWinCondition("reach_score", claimantScoreCap);
-        faction2.addWinCondition("own_all_war_zones");
+        faction2.addWinCondition(WarConditionReachScore.ID, claimantScoreCap);
+        faction2.addWinCondition(WarConditionOwnAllWarZones.ID);
 
         factions.add(faction2);
 

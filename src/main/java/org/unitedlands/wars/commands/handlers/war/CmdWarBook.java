@@ -11,6 +11,10 @@ import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
+import org.unitedlands.wars.classes.wargoal.WarGoalConquest;
+import org.unitedlands.wars.classes.wargoal.WarGoalRevolt;
+import org.unitedlands.wars.classes.wargoal.WarGoalSkirmish;
+import org.unitedlands.wars.classes.wargoal.WarGoalSubjugation;
 import org.unitedlands.wars.commands.CmdWar;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.WarBookUtils;
@@ -25,11 +29,11 @@ public class CmdWarBook implements UnitedCommandExecutor {
             return WarManager.instance().getWarGoalIds();
         case 2:
             switch (args[0]) {
-            case "revolt":
+            case WarGoalRevolt.ID:
                 return null;
-            case "skirmish", "subjugation", "plunder":
+            case WarGoalSkirmish.ID, WarGoalSubjugation.ID, "plunder":
                 return UnitedLandsDataManager.instance().getSettlementNames();
-            case "conquest":
+            case WarGoalConquest.ID:
                 return UnitedLandsDataManager.instance().getRegionNames();
             }
             break;
@@ -44,7 +48,7 @@ public class CmdWarBook implements UnitedCommandExecutor {
             sendUsage(sender);
             return;
         }
-        if (args.length == 1 && !"revolt".equals(args[0])) {
+        if (args.length == 1 && !WarGoalRevolt.ID.equals(args[0])) {
             sendUsage(sender);
             return;
         }
@@ -66,7 +70,13 @@ public class CmdWarBook implements UnitedCommandExecutor {
             return;
         }
 
-        var requiredRank = UnitedWarsConfig.get().warGoalSettings().get(args[0]).requiredRank();
+        var goalSettings = warGoal.getSettings();
+        if (goalSettings == null) {
+            United.messenger().send(sender, "errors.generic");
+            return;
+        }
+
+        var requiredRank = goalSettings.requiredRank();
         if (requiredRank != null) {
             if (!(citizen.getSettlementRanks().contains(requiredRank) || citizen.getCountryRanks().contains(requiredRank))) {
                 United.messenger().send(sender, "player.war.book.no-rank");
@@ -77,14 +87,14 @@ public class CmdWarBook implements UnitedCommandExecutor {
         GeopolObject declarer = null;
         GeopolObject target = null;
 
-        if ("skirmish".equals(args[0]) || "plunder".equals(args[0])) {
+        if (WarGoalSkirmish.ID.equals(args[0]) || "plunder".equals(args[0])) {
             declarer = citizen.getSettlement();
             target = UnitedLandsDataManager.instance().getSettlement(args[1]);
             if (target == null) {
                 United.messenger().send(sender, "player.war.book.target-invalid", args[0]);
                 return;
             }
-        } else if ("revolt".equals(args[0])) {
+        } else if (WarGoalRevolt.ID.equals(args[0])) {
             declarer = citizen.getSettlement();
             target = citizen.getSettlement().getRegion();
             if (target == null) {
@@ -99,14 +109,14 @@ public class CmdWarBook implements UnitedCommandExecutor {
                 return;
             }
 
-            if ("subjugation".equals(args[0])) {
+            if (WarGoalSubjugation.ID.equals(args[0])) {
                 declarer = citizen.getSettlement().getCountry();
                 target = UnitedLandsDataManager.instance().getSettlement(args[1]);
                 if (target == null) {
                     United.messenger().send(sender, "player.war.book.target-invalid", args[0]);
                     return;
                 }
-            } else if ("conquest".equals(args[0])) {
+            } else if (WarGoalConquest.ID.equals(args[0])) {
                 declarer = citizen.getSettlement().getCountry();
                 target = UnitedLandsDataManager.instance().getRegion(args[1]);
                 if (target == null) {
@@ -124,7 +134,7 @@ public class CmdWarBook implements UnitedCommandExecutor {
             return;
         }
 
-        var cost = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId()).cost();
+        var cost = goalSettings.cost();
         var mobilisation = declarer.getAttribute("MOBILIZATION", UnitedWarsConfig.get().geopolAttributeDefaults().get("MOBILIZATION"));
         if (mobilisation.getCurrentValue() < cost) {
             United.messenger().send(sender, "player.war.book.cost-too-high", String.valueOf(cost), String.valueOf(mobilisation.getCurrentValue()));

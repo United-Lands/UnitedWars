@@ -1,7 +1,7 @@
 package org.unitedlands.wars.listeners.UnitedLands;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,6 +10,7 @@ import org.unitedlands.unitedlands.classes.events.region.RegionClaimStartEvent;
 import org.unitedlands.unitedlands.classes.events.region.RegionDoubleClaimEvent;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.war.War;
+import org.unitedlands.wars.classes.wargoal.WarGoalClaimDispute;
 import org.unitedlands.wars.managers.WarManager;
 
 public class UnitedLandsCountryListener implements Listener {
@@ -39,7 +40,14 @@ public class UnitedLandsCountryListener implements Listener {
                 return;
             }
 
-            var warGoal = WarManager.instance().getWarGoal("claim-dispute");
+            var warGoal = WarManager.instance().getWarGoal(WarGoalClaimDispute.ID);
+
+            var validationResult = warGoal.validate(attackingCountry, region);
+            if (!validationResult.valid()) {
+                United.messenger().send(event.getPlayer(), "player.war.claim-dispute.validation-error", validationResult.message());
+                return;
+            }
+
             var title = "Claim_Dispute_" + region.getName();
             var description = attackingCountry.getCleanName() + " is fighting " + targetCountry.getCleanName() + " over control of " + region.getCleanName()
                     + ".";
@@ -61,6 +69,7 @@ public class UnitedLandsCountryListener implements Listener {
 
     }
 
+    @EventHandler
     public void onCountryPreRemove(CountryPreRemoveEvent event) {
 
         var country = event.getCountry();
@@ -69,7 +78,7 @@ public class UnitedLandsCountryListener implements Listener {
         // lost wars etc.), iterate all wars to see if the country is part of it, and
         // act accordingly
 
-        List<War> warsToEnd = new ArrayList<>();
+        Set<War> warsToEnd = new LinkedHashSet<>();
         for (var war : WarManager.instance().getWars()) {
 
             // The event might have been caused by a war that has just ended. Ignore.
@@ -91,11 +100,10 @@ public class UnitedLandsCountryListener implements Listener {
                     }
                 }
             }
+        }
 
-            for (var warToEnd : warsToEnd) {
-                WarManager.instance().endWar(warToEnd);
-            }
-
+        for (var warToEnd : warsToEnd) {
+            WarManager.instance().endWar(warToEnd);
         }
     }
 

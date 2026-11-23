@@ -5,17 +5,21 @@ import java.util.Set;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnAllWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnNoWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionReachScore;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
 
 public class WarGoalSkirmish extends WarGoal {
 
+    public static final String ID = "skirmish";
+
     public WarGoalSkirmish() {
-        super("skirmish");
+        super(ID);
     }
 
     @Override
@@ -50,27 +54,27 @@ public class WarGoalSkirmish extends WarGoal {
         var declaringSettlement = (Settlement) declarer;
         var targeSettlement = (Settlement) target;
 
-         var declarerScoreCap = UnitedWarsConfig.get().warGoalSettings().get("skirmish").scoreCaps().get("attacker").val();
+         var declarerScoreCap = getScoreCap("attacker");
 
         WarFaction declarerFaction = new WarFaction(war, WarFactionRole.ATTACKER, declaringSettlement.getName(), -65536);
         declarerFaction.setFactionLeaderId(declaringSettlement.getUuid());
         declarerFaction.addSettlement(declaringSettlement);
 
-        declarerFaction.addWinCondition("reach_score", declarerScoreCap);
-        declarerFaction.addWinCondition("own_all_war_zones");
-        declarerFaction.addLoseCondition("own_no_war_zones");
+        declarerFaction.addWinCondition(WarConditionReachScore.ID, declarerScoreCap);
+        declarerFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
+        declarerFaction.addLoseCondition(WarConditionOwnNoWarZones.ID);
 
         factions.add(declarerFaction);
 
-        var targetScoreCap = UnitedWarsConfig.get().warGoalSettings().get("skirmish").scoreCaps().get("defender").val();
+        var targetScoreCap = getScoreCap("defender");
 
         WarFaction targetFaction = new WarFaction(war, WarFactionRole.DEFENDER, targeSettlement.getName(), -16776961);
         targetFaction.setFactionLeaderId(targeSettlement.getUuid());
         targetFaction.addSettlement(targeSettlement);
 
-        targetFaction.addWinCondition("reach_score", targetScoreCap);
-        targetFaction.addWinCondition("own_all_war_zones");
-        targetFaction.addLoseCondition("own_no_war_zones");
+        targetFaction.addWinCondition(WarConditionReachScore.ID, targetScoreCap);
+        targetFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
+        targetFaction.addLoseCondition(WarConditionOwnNoWarZones.ID);
 
         factions.add(targetFaction);
 

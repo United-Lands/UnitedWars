@@ -4,8 +4,10 @@ import org.unitedlands.wars.classes.war.WarFaction;
 
 public class WarConditionOwnNoWarZones extends WarCondition {    
 
+    public static final String ID = "own_no_war_zones";
+
     public WarConditionOwnNoWarZones() {
-        this.id = "own_no_war_zones";
+        this.id = ID;
         this.description = "Own no war zones";
     }
 

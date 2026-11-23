@@ -3,6 +3,7 @@ package org.unitedlands.wars.classes.infoscreens;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.war.War;
+import org.unitedlands.wars.classes.warcondition.WarConditionReachScore;
 
 public class WarDeclaredInfoScreen extends UnitedWarInfoScreen {
 
@@ -29,7 +30,7 @@ public class WarDeclaredInfoScreen extends UnitedWarInfoScreen {
         var factionCounter = 1;
         for (var faction : war.getWarFactions()) {
 
-            var scoreCap = faction.getWinConditions().get("reach_score");
+            var scoreCap = faction.getWinConditions().get(WarConditionReachScore.ID);
             if (scoreCap != null)
             {
                 addComponent("faction" + factionCounter, 

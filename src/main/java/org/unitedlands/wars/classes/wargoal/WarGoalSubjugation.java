@@ -8,17 +8,21 @@ import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnAllWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionOwnNoWarZones;
+import org.unitedlands.wars.classes.warcondition.WarConditionReachScore;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
 
 public class WarGoalSubjugation extends WarGoal {
 
+    public static final String ID = "subjugation";
+
     public WarGoalSubjugation() {
-        super("subjugation");
+        super(ID);
     }
 
     @Override
@@ -68,10 +72,10 @@ public class WarGoalSubjugation extends WarGoal {
         attackerFaction.setFactionLeaderId(country.getUuid());
         attackerFaction.addCountry(country);
 
-        var attackerScoreCap = UnitedWarsConfig.get().warGoalSettings().get("subjugation").scoreCaps().get("attacker").val();
-        attackerFaction.addWinCondition("reach_score", attackerScoreCap);
-        attackerFaction.addWinCondition("own_all_war_zones");
-        attackerFaction.addLoseCondition("own_no_war_zones");
+        var attackerScoreCap = getScoreCap("attacker");
+        attackerFaction.addWinCondition(WarConditionReachScore.ID, attackerScoreCap);
+        attackerFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
+        attackerFaction.addLoseCondition(WarConditionOwnNoWarZones.ID);
 
         factions.add(attackerFaction);
 
@@ -79,10 +83,10 @@ public class WarGoalSubjugation extends WarGoal {
         defenderFaction.setFactionLeaderId(settlement.getUuid());
         defenderFaction.addSettlement(settlement);
 
-        var defenderScoreCap = UnitedWarsConfig.get().warGoalSettings().get("subjugation").scoreCaps().get("defender").val();
-        defenderFaction.addWinCondition("reach_score", defenderScoreCap);
-        defenderFaction.addWinCondition("own_all_war_zones");
-        defenderFaction.addLoseCondition("own_no_war_zones");
+        var defenderScoreCap = getScoreCap("defender");
+        defenderFaction.addWinCondition(WarConditionReachScore.ID, defenderScoreCap);
+        defenderFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
+        defenderFaction.addLoseCondition(WarConditionOwnNoWarZones.ID);
         defenderFaction.setWar(war);
 
         factions.add(defenderFaction);

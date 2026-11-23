@@ -6,8 +6,10 @@ import org.unitedlands.wars.classes.war.WarFaction;
 
 public class WarConditionLastFactionAlive extends WarCondition {
 
+    public static final String ID = "last_faction_alive";
+
     public WarConditionLastFactionAlive() {
-        this.id = "last_faction_alive";
+        this.id = ID;
         this.description = "Be the last faction alive";
     }
 

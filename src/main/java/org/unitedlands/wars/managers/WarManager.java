@@ -66,19 +66,17 @@ public class WarManager {
     }
 
     private void initializeWarGoals() {
-        warGoals.put("skirmish", new WarGoalSkirmish());
-        warGoals.put("revolt", new WarGoalRevolt());
-        warGoals.put("claim-dispute", new WarGoalClaimDispute());
-        warGoals.put("conquest", new WarGoalConquest());
-        warGoals.put("subjugation", new WarGoalSubjugation());
+        for (var warGoal : List.of(new WarGoalSkirmish(), new WarGoalRevolt(), new WarGoalClaimDispute(), new WarGoalConquest(),
+                new WarGoalSubjugation())) {
+            warGoals.put(warGoal.getId(), warGoal);
+        }
     }
 
     private void initializeWarConditions() {
-        warConditions.put("reach_score", new WarConditionReachScore());
-        warConditions.put("own_no_war_zones", new WarConditionOwnNoWarZones());
-        warConditions.put("own_minimum_war_zones", new WarConditionOwnMinimumWarZones());
-        warConditions.put("own_all_war_zones", new WarConditionOwnAllWarZones());
-        warConditions.put("last_faction_alive", new WarConditionLastFactionAlive());
+        for (var warCondition : List.of(new WarConditionReachScore(), new WarConditionOwnNoWarZones(), new WarConditionOwnMinimumWarZones(),
+                new WarConditionOwnAllWarZones(), new WarConditionLastFactionAlive())) {
+            warConditions.put(warCondition.getId(), warCondition);
+        }
     }
 
     public void loadWars() {
@@ -283,6 +281,9 @@ public class WarManager {
     }
 
     public void endWar(War war) {
+
+        if (Boolean.TRUE.equals(war.hasEnded()))
+            return;
 
         war.setActive(false);
         war.setEnded(true);

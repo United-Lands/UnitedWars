@@ -6,6 +6,7 @@ import java.util.List;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.classes.war.War;
+import org.unitedlands.wars.classes.warcondition.WarConditionReachScore;
 import org.unitedlands.wars.managers.WarManager;
 
 public class WarInfoScreen extends UnitedWarInfoScreen {
@@ -27,7 +28,7 @@ public class WarInfoScreen extends UnitedWarInfoScreen {
         var factionCounter = 1;
         for (var faction : war.getWarFactions()) {
 
-            var scoreCap = faction.getWinConditions().get("reach_score");
+            var scoreCap = faction.getWinConditions().get(WarConditionReachScore.ID);
             if (scoreCap != null) {
                 addComponent("faction" + factionCounter, "info-screens.war-info.faction-entry-maxscore", UnitedWars.instance(), faction.getColoredCleanName(),
                         faction.getRole().toString(), String.valueOf(faction.getScore()), String.valueOf(scoreCap));

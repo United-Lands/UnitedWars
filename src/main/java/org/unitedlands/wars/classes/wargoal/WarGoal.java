@@ -10,6 +10,9 @@ import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
+import org.unitedlands.utils.United;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig;
+import org.unitedlands.wars.classes.config.UnitedWarsConfig.WarGoalSetting;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.warzone.WarZoneRegion;
@@ -42,6 +45,27 @@ public abstract class WarGoal {
     public abstract void resolve(War war);
 
     public void onWarRegistered(War war) {
+    }
+
+    public WarGoalSetting getSettings() {
+        var settings = UnitedWarsConfig.get().warGoalSettings();
+        if (settings == null || !settings.has(id)) {
+            United.logger().error("Missing config section for war goal " + id, "UnitedWars");
+            return null;
+        }
+        return settings.get(id);
+    }
+
+    protected Integer getScoreCap(String side) {
+        var settings = getSettings();
+        if (settings == null)
+            return null;
+        var scoreCaps = settings.scoreCaps();
+        if (scoreCaps == null || !scoreCaps.has(side)) {
+            United.logger().error("Missing score cap '" + side + "' for war goal " + id + ", score win condition will never trigger.", "UnitedWars");
+            return null;
+        }
+        return scoreCaps.get(side).val();
     }
 
     public WarZone createSettlementZone(War war, WarFaction owningFaction, Settlement settlement) {

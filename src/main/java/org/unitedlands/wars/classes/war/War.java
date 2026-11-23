@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.MissingFormatArgumentException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,6 +22,7 @@ import org.unitedlands.unitedlands.utils.CoordinateUtils;
 import org.unitedlands.unitedlands.utils.SerializationUtils;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
+import org.unitedlands.wars.classes.warcondition.WarConditionLastFactionAlive;
 import org.unitedlands.wars.classes.wargoal.WarGoal;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.classes.warzone.WarZoneWarcamp;
@@ -295,9 +295,9 @@ public class War implements Identifiable {
         war.setWarGoal(warGoal);
         war.setWarTargetId(target.getUuid());
 
-        var goalSettings = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId());
+        var goalSettings = warGoal.getSettings();
         if (goalSettings == null)
-            throw new MissingFormatArgumentException("Could not find config section for war goal " + warGoal.getId());
+            return null;
 
         long warmup = goalSettings.warmupTime();
         long duration = goalSettings.duration();
@@ -379,7 +379,7 @@ public class War implements Identifiable {
 
         if (remainingFactions.size() == 1) {
             setWinningFaction(remainingFactions.getFirst());
-            setWinningCondition("last_faction_alive");
+            setWinningCondition(WarConditionLastFactionAlive.ID);
             return true;
         }
 

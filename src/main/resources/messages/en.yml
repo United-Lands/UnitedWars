@@ -39,6 +39,8 @@ player:
       no-rank: "<yellow>You don't have the required settlement or country rank to to this.</yellow>"
       no-region: "<yellow>Your settlement is not in a region.</yellow>"
       target-invalid: "<yellow>Target {1} not valid for this war goal.</yellow>"
+    claim-dispute:
+      validation-error: "<yellow>Can't start a claim dispute: {1}</yellow>"
   invite:
     joined: "<broadcast>{1} just joined faction {2} in the war {3}!<broadcast>"
   mercenary:

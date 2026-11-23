@@ -6,13 +6,17 @@ import org.unitedlands.wars.classes.war.WarFaction;
 
 public class WarConditionOwnMinimumWarZones extends WarCondition {
 
+    public static final String ID = "own_minimum_war_zones";
+
     public WarConditionOwnMinimumWarZones() {
-        this.id = "own_minimum_war_zones";
+        this.id = ID;
         this.description = "Own minimum war zones";
     }
 
     @Override
     public boolean evaluate(WarFaction faction, Integer param) {
+        if (param == null)
+            return false;
         var warZones = faction.getWar().getObjectiveWarZones();
         var controlledZones = warZones.stream().filter(z -> faction.equals(z.getOccupier()))
                 .collect(Collectors.counting());

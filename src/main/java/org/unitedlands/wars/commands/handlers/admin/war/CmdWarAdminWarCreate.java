@@ -9,6 +9,10 @@ import org.unitedlands.registrars.command.UnitedCommandExecutor;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.war.War;
+import org.unitedlands.wars.classes.wargoal.WarGoalConquest;
+import org.unitedlands.wars.classes.wargoal.WarGoalRevolt;
+import org.unitedlands.wars.classes.wargoal.WarGoalSkirmish;
+import org.unitedlands.wars.classes.wargoal.WarGoalSubjugation;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.GeopolUtils;
 
@@ -29,16 +33,16 @@ public class CmdWarAdminWarCreate implements UnitedCommandExecutor {
             return WarManager.instance().getWarGoalIds();
         case 2:
             switch (args[0]) {
-            case "conquest", "subjugation":
+            case WarGoalConquest.ID, WarGoalSubjugation.ID:
                 return UnitedLandsDataManager.instance().getCountryNames();
-            case "plunder", "skirmish", "revolt":
+            case "plunder", WarGoalSkirmish.ID, WarGoalRevolt.ID:
                 return UnitedLandsDataManager.instance().getSettlementNames();
             }
         case 3:
             switch (args[0]) {
-            case "conquest", "revolt":
+            case WarGoalConquest.ID, WarGoalRevolt.ID:
                 return UnitedLandsDataManager.instance().getRegionNames();
-            case "plunder", "skirmish", "subjugation":
+            case "plunder", WarGoalSkirmish.ID, WarGoalSubjugation.ID:
                 return UnitedLandsDataManager.instance().getSettlementNames();
             case "INDEPENDENCE":
                 return UnitedLandsDataManager.instance().getCountryNames();
@@ -57,7 +61,7 @@ public class CmdWarAdminWarCreate implements UnitedCommandExecutor {
             return;
         }
 
-        var warGoal = WarManager.instance().getWarGoal("skirmish");
+        var warGoal = WarManager.instance().getWarGoal(WarGoalSkirmish.ID);
         try {
             warGoal = WarManager.instance().getWarGoal(args[0]);
         } catch (Exception ex) {

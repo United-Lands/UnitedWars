@@ -4,8 +4,10 @@ import org.unitedlands.wars.classes.war.WarFaction;
 
 public class WarConditionOwnAllWarZones extends WarCondition {
 
+    public static final String ID = "own_all_war_zones";
+
     public WarConditionOwnAllWarZones() {
-        this.id = "own_all_war_zones";
+        this.id = ID;
         this.description = "Own all war zones";
     }
 
