@@ -1,8 +1,6 @@
 package org.unitedlands.wars.commands.handlers.war;
 
 import java.util.List;
-import java.util.UUID;
-
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +11,6 @@ import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
-import org.unitedlands.wars.classes.wargoal.WarGoal;
 import org.unitedlands.wars.commands.CmdWar;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.WarBookUtils;

@@ -44,6 +44,10 @@ public class ServerEventListener implements Listener {
         if (!WarManager.instance().anyWarsPending() && !WarManager.instance().anyWarsActive())
             return;
 
+        // Do this before the delayed refresh below: siege chunks resolve the player's
+        // faction through the war's player list, which drops offline players.
+        SiegeManager.instance().removePlayerFromAllSiegeChunks(event.getPlayer());
+
         // Delay by one tick so the quitting player is actually considered offline
         Bukkit.getScheduler().runTaskLater(UnitedWars.instance(), () -> {
             WarManager.instance().updatePlayerLists();

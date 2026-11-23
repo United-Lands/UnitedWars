@@ -17,6 +17,7 @@ import org.unitedlands.unitedlands.classes.Citizen;
 import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
+import org.unitedlands.wars.classes.db.WarsDbService;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.warcondition.WarConditionLastFactionAlive;
@@ -87,11 +88,11 @@ public class WarManager {
         CompletableFuture<List<WarZone>> warZonesFuture = databaseManager.getWarZoneService().getAllAsync();
 
         try {
-            CompletableFuture.allOf(warFuture, warFactionsFuture, warZonesFuture).thenRun(() -> {
-                buildWars(warFuture.join());
-                buildWarfactions(warFactionsFuture.join());
-                buildWarZones(warZonesFuture.join());
-            }).get();
+            // Wait for the queries, then build the cache on the calling (main) thread
+            CompletableFuture.allOf(warFuture, warFactionsFuture, warZonesFuture).get();
+            buildWars(warFuture.join());
+            buildWarfactions(warFactionsFuture.join());
+            buildWarZones(warZonesFuture.join());
 
             SiegeManager.instance().loadSiegeChunks();
 
@@ -119,8 +120,8 @@ public class WarManager {
             } else {
                 pendingWars.put(war.getUuid(), war);
             }
-            United.logger().info("Loaded " + loadedWars.size() + " war(s) from the database.", "UnitedWars");
         }
+        United.logger().info("Loaded " + getWars().size() + " war(s) from the database.", "UnitedWars");
 
     }
 
@@ -168,6 +169,11 @@ public class WarManager {
                 break;
             }
 
+            // Converting to the concrete zone type goes through the setters, which
+            // flag the zone as dirty. The loaded state matches the database.
+            var cachedZone = getWarZone(zone.getUuid());
+            if (cachedZone != null)
+                cachedZone.setStateChanged(false);
         }
         United.logger().info("Loaded " + loadedWarZones.size() + " war zone(s) from the database.", "UnitedWars");
 
@@ -210,29 +216,31 @@ public class WarManager {
         saveChangedData();
     }
 
-    private void saveChangedData() {
-        for (var war : pendingWars.values()) {
+    /**
+     * Writes all dirty wars, war zones and war factions. The dirty flag is cleared
+     * before the write is queued (the service snapshots the entity at that point)
+     * and set again if the write fails, so the next cycle retries it.
+     */
+    public void saveChangedData() {
+        for (var war : getWars()) {
             if (war.stateChanged()) {
-                databaseManager.getWarService().updateAsync(war);
                 war.setStateChanged(false);
-            }
-        }
-        for (var war : activeWars.values()) {
-            if (war.stateChanged()) {
-                databaseManager.getWarService().updateAsync(war);
-                war.setStateChanged(false);
+                WarsDbService.onWriteFailed(databaseManager.getWarService().updateAsync(war),
+                        "war " + war.getUuid(), () -> war.setStateChanged(true));
             }
         }
         for (var warZone : warZones.values()) {
             if (warZone.stateChanged()) {
-                databaseManager.getWarZoneService().updateAsync(warZone);
                 warZone.setStateChanged(false);
+                WarsDbService.onWriteFailed(databaseManager.getWarZoneService().updateAsync(warZone),
+                        "war zone " + warZone.getUuid(), () -> warZone.setStateChanged(true));
             }
         }
         for (var warFaction : warFactions.values()) {
             if (warFaction.stateChanged()) {
-                databaseManager.getWarFactionService().updateAsync(warFaction);
                 warFaction.setStateChanged(false);
+                WarsDbService.onWriteFailed(databaseManager.getWarFactionService().updateAsync(warFaction),
+                        "war faction " + warFaction.getUuid(), () -> warFaction.setStateChanged(true));
             }
         }
     }

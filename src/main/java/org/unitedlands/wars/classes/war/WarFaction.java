@@ -355,11 +355,13 @@ public class WarFaction implements Identifiable {
     public void setWarCampLocation(Location warCampLocation) {
         this.warCampLocation = warCampLocation;
         this.warcampLocationSerialized = SerializationUtils.serializeLocation(warCampLocation);
+        this.stateChanged = true;
     }
 
     public void removeWarCampLocation() {
         this.warCampLocation = null;
         this.warcampLocationSerialized = null;
+        this.stateChanged = true;
     }
 
     public boolean isFactionLeader(UUID playerId) {

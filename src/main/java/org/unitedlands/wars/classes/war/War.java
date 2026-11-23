@@ -139,10 +139,12 @@ public class War implements Identifiable {
         if (faction == null) {
             this.winningFaction = null;
             this.winningFactionId = null;
+            this.stateChanged = true;
             return;
         }
         this.winningFactionId = faction.getUuid();
         this.winningFaction = faction;
+        this.stateChanged = true;
     }
 
     public String getWinningCondition() {
@@ -151,6 +153,7 @@ public class War implements Identifiable {
 
     public void setWinningCondition(String winningCondition) {
         this.winningCondition = winningCondition;
+        this.stateChanged = true;
     }
 
     public Long getScheduledBeginTime() {
@@ -246,6 +249,7 @@ public class War implements Identifiable {
     public void setWarFactions(Set<WarFaction> warFactions) {
         this.warFactions = warFactions;
         this.warFactionsSerialized = SerializationUtils.serializeIdentifiableList(warFactions);
+        this.stateChanged = true;
     }
 
     public boolean hasWarZone(WarZone warZone) {
@@ -274,6 +278,7 @@ public class War implements Identifiable {
     public void setWarZones(Set<WarZone> warZones) {
         this.warZones = warZones;
         this.warZonesSerialized = SerializationUtils.serializeIdentifiableList(warZones);
+        this.stateChanged = true;
     }
 
     public static War create(WarGoal warGoal, GeopolObject declarer, GeopolObject target, String title, String description) {

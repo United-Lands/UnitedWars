@@ -123,6 +123,7 @@ public class WarZone implements Identifiable {
 
     public void setOccupierId(UUID occupierId) {
         this.occupierId = occupierId;
+        this.stateChanged = true;
     }
 
     public WarFaction getOccupier() {
@@ -134,6 +135,7 @@ public class WarZone implements Identifiable {
     public void setOccupier(WarFaction occupier) {
         this.occupierId = occupier.getUuid();
         this.occupier = occupier;
+        this.stateChanged = true;
     }
 
     public War getWar() {
@@ -260,16 +262,25 @@ public class WarZone implements Identifiable {
         var snapshotManager = UnitedRestoration.instance().getChunkSnapshotManager();
         United.logger().info("Backing up " + griefArea.size() + " chunks for war zone " + uuid);
         for (var coords : griefArea) {
-            coords.getWorld().getChunkAtAsync(coords.getX(), coords.getZ()).thenCompose(chunk -> {
+            var world = coords.getWorld();
+            // Has to be checked before the request, inside the callback the chunk is always loaded
+            var wasLoaded = world.isChunkLoaded(coords.getX(), coords.getZ());
+
+            world.getChunkAtAsync(coords.getX(), coords.getZ()).thenCompose(chunk -> {
+                // saveSnapshot captures the blocks synchronously, so the chunk can be
+                // released right away. Only unload chunks loaded just for the backup;
+                // the request is ignored if something else still needs the chunk.
                 CompletableFuture<Boolean> saveFuture = snapshotManager.saveSnapshot(chunk);
-                if (!chunk.isLoaded())
-                    chunk.unload(false);
+                if (!wasLoaded)
+                    world.unloadChunkRequest(coords.getX(), coords.getZ());
                 return saveFuture;
             }).whenComplete((success, ex) -> {
                 if (ex != null) {
                     United.logger().error("Error processing chunk at " + coords + ": " + ex.getMessage());
                 } else if (Boolean.TRUE.equals(success)) {
                     United.logger().info("Saved chunk at " + coords);
+                } else {
+                    United.logger().error("Could not back up chunk at " + coords + ", it will not be restored after the war.");
                 }
             });
 

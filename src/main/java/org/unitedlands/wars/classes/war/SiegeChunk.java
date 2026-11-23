@@ -86,6 +86,10 @@ public class SiegeChunk implements Identifiable {
         this.uuid = uuid;
     }
 
+    public UUID getWarId() {
+        return warId;
+    }
+
     public War getWar() {
         if (war == null && warId != null)
             war = WarManager.instance().getWar(warId);
@@ -115,9 +119,11 @@ public class SiegeChunk implements Identifiable {
     }
 
     public void setOwner(WarFaction warFaction) {
+        this.stateChanged = true;
         if (warFaction == null) {
             this.owner = null;
             this.ownerId = null;
+            return;
         }
         this.ownerId = warFaction.getUuid();
         this.owner = warFaction;
@@ -145,6 +151,7 @@ public class SiegeChunk implements Identifiable {
 
     public void setCurrentHealth(int currentHealth) {
         this.currentHealth = currentHealth;
+        this.stateChanged = true;
     }
 
     public int getScoreValue() {
@@ -169,6 +176,7 @@ public class SiegeChunk implements Identifiable {
 
     public void setOccupied(boolean occupied) {
         this.occupied = occupied;
+        this.stateChanged = true;
     }
 
     public boolean stateChanged() {
@@ -297,7 +305,15 @@ public class SiegeChunk implements Identifiable {
         if (healthChangeEvent.getHealthChange() == 0)
             return;
 
-        currentHealth = Math.max(0, Math.min(maxHealth, currentHealth + healthChangeEvent.getHealthChange()));
+        var newHealth = Math.max(0, Math.min(maxHealth, currentHealth + healthChangeEvent.getHealthChange()));
+
+        // Nothing to persist if health is already at its upper bound (e.g. owner
+        // healing a fully healed chunk). Health 0 still falls through to the capture.
+        if (newHealth == currentHealth && newHealth > 0)
+            return;
+
+        currentHealth = newHealth;
+        this.stateChanged = true;
 
         // Capture and occupy the chunk
         if (currentHealth == 0) {
@@ -313,8 +329,6 @@ public class SiegeChunk implements Identifiable {
             var captureEvent = new WarScoreEvent(getWar(), capturingPlayer, leadingFaction, WarScoreType.SIEGE_CHUNK_CAPTURE, getScoreValue());
             captureEvent.callEvent();
         }
-
-        this.stateChanged = true;
     }
 
     private WarFactionControlResult getDominantWarFaction() {

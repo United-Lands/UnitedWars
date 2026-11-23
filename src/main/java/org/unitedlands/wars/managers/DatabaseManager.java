@@ -2,7 +2,6 @@ package org.unitedlands.wars.managers;
 
 import java.sql.SQLException;
 
-import org.unitedlands.unitedlands.classes.db.SchemaVersion;
 import org.unitedlands.libs.ormlite.dao.Dao;
 import org.unitedlands.libs.ormlite.dao.DaoManager;
 import org.unitedlands.libs.ormlite.jdbc.DataSourceConnectionSource;
@@ -12,6 +11,7 @@ import org.unitedlands.libs.zaxxer.hikari.HikariConfig;
 import org.unitedlands.libs.zaxxer.hikari.HikariDataSource;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
+import org.unitedlands.wars.classes.db.SchemaVersion;
 import org.unitedlands.wars.classes.db.SiegeChunkService;
 import org.unitedlands.wars.classes.db.WarFactionService;
 import org.unitedlands.wars.classes.db.WarService;

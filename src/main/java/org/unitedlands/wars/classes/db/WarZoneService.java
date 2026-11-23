@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.unitedlands.libs.ormlite.dao.Dao;
 import org.unitedlands.wars.classes.warzone.WarZone;
 
-public class WarZoneService extends BaseDbService<WarZone> {
+public class WarZoneService extends WarsDbService<WarZone> {
 
     public WarZoneService(Dao<WarZone, UUID> dao) {
         super(dao);

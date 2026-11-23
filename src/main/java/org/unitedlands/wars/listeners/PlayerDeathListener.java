@@ -95,13 +95,17 @@ public class PlayerDeathListener implements Listener {
                 // If the killer is an NPC, see if it shares its war with the victim. If so,
                 // populate the killer data, otherwise cancel.
                 var pdc = killer.getPersistentDataContainer();
-                if (!pdc.get(new NamespacedKey(UnitedWars.instance(), "npc"), PersistentDataType.BOOLEAN)) {
+                // Regular mobs carry no NPC tag, so default to false instead of unboxing null
+                if (!pdc.getOrDefault(new NamespacedKey(UnitedWars.instance(), "npc"), PersistentDataType.BOOLEAN, false)) {
                     return;
                 }
 
                 var warId = pdc.get(new NamespacedKey(UnitedWars.instance(), "war"), PersistentDataType.STRING);
                 var factionId = pdc.get(new NamespacedKey(UnitedWars.instance(), "faction"), PersistentDataType.STRING);
                 var rank = pdc.get(new NamespacedKey(UnitedWars.instance(), "rank"), PersistentDataType.STRING);
+                if (warId == null || factionId == null || rank == null)
+                    return;
+
                 var npcWar = WarManager.instance().getWar(UUID.fromString(warId));
                 if (npcWar == null)
                     return;
