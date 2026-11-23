@@ -5,12 +5,15 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.unitedlands.unitedlands.utils.CoordinateUtils;
 import org.unitedlands.wars.UnitedWars;
 import org.unitedlands.wars.managers.SiegeManager;
 import org.unitedlands.wars.managers.WarManager;
@@ -44,8 +47,6 @@ public class ServerEventListener implements Listener {
         if (!WarManager.instance().anyWarsPending() && !WarManager.instance().anyWarsActive())
             return;
 
-        // Do this before the delayed refresh below: siege chunks resolve the player's
-        // faction through the war's player list, which drops offline players.
         SiegeManager.instance().removePlayerFromAllSiegeChunks(event.getPlayer());
 
         // Delay by one tick so the quitting player is actually considered offline
@@ -53,6 +54,30 @@ public class ServerEventListener implements Listener {
             WarManager.instance().updatePlayerLists();
             SiegeManager.instance().updateSieges();
         }, 1);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        if (!WarManager.instance().anyWarsActive())
+            return;
+        SiegeManager.instance().removePlayerFromAllSiegeChunks(event.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        if (!WarManager.instance().anyWarsActive())
+            return;
+
+        var player = event.getPlayer();
+
+        // The player is only moved to the respawn location after this event
+        Bukkit.getScheduler().runTask(UnitedWars.instance(), () -> {
+            if (!player.isOnline())
+                return;
+            var coords = CoordinateUtils.locationToChunkCoordinates(player.getLocation());
+            if (WarManager.instance().isChunkInWarZone(coords))
+                SiegeManager.instance().updatePlayersInChunk(player, null, coords);
+        });
     }
 
     // Workaround for book signing

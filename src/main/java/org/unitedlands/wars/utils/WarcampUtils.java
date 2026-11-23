@@ -35,24 +35,19 @@ public class WarcampUtils {
         var chunkX = chunk.getX();
         var chunkZ = chunk.getZ();
 
-        // saveSnapshot captures the chunk on this (main) thread, but completes its
-        // future on an async scheduler thread.
         var future = UnitedRestoration.instance().getChunkSnapshotManager().saveSnapshot(chunk);
 
         future.thenAccept(saved -> {
 
-            // Without a backup the camp could never be removed again, so don't place it
             if (!Boolean.TRUE.equals(saved)) {
                 United.logger().error("Could not back up chunk " + chunkX + "," + chunkZ + ", warcamp was not placed.");
                 return;
             }
 
-            // Loading the schematic is file I/O and can stay off the main thread...
             var clipboard = loadRandomTemplate();
             if (clipboard == null)
                 return;
 
-            // ...but the world may only be changed on the main thread
             var plugin = UnitedWars.instance();
             if (!plugin.isEnabled())
                 return;

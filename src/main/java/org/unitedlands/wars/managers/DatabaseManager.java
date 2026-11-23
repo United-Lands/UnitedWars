@@ -81,7 +81,7 @@ public class DatabaseManager {
             United.logger().info("DatabaseManager initialized successfully.", "UnitedWars");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Database initialization failed: " + e.getMessage(), e);
         }
     }
 

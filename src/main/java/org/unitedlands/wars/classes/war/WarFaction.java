@@ -19,6 +19,7 @@ import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.utils.GeopolUtils;
+import org.unitedlands.wars.utils.Serializers;
 
 public class WarFaction implements Identifiable {
 
@@ -140,7 +141,7 @@ public class WarFaction implements Identifiable {
 
     public Set<Country> getCountries() {
         if (this.countries == null) {
-            this.countries = SerializationUtils.deserializeUuidListToSet(countriesSerialized, UnitedLandsDataManager.instance()::getCountry);
+            this.countries = Serializers.deserializeUuidSet(countriesSerialized, UnitedLandsDataManager.instance()::getCountry, "countries of faction " + uuid);
         }
         return this.countries;
     }
@@ -170,7 +171,7 @@ public class WarFaction implements Identifiable {
 
     public Set<Settlement> getSettlements() {
         if (this.settlements == null) {
-            this.settlements = SerializationUtils.deserializeUuidListToSet(settlementsSerialized, UnitedLandsDataManager.instance()::getSettlement);
+            this.settlements = Serializers.deserializeUuidSet(settlementsSerialized, UnitedLandsDataManager.instance()::getSettlement, "settlements of faction " + uuid);
         }
         return this.settlements;
     }
@@ -209,7 +210,7 @@ public class WarFaction implements Identifiable {
 
     public Set<Citizen> getMercenaries() {
         if (this.mercenaries == null) {
-            this.mercenaries = SerializationUtils.deserializeUuidListToSet(mercenariesSerialized, UnitedLandsDataManager.instance()::getCitizen);
+            this.mercenaries = Serializers.deserializeUuidSet(mercenariesSerialized, UnitedLandsDataManager.instance()::getCitizen, "mercenaries of faction " + uuid);
         }
         return this.mercenaries;
     }

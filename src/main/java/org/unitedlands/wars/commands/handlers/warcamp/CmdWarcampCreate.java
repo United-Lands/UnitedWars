@@ -87,7 +87,7 @@ public class CmdWarcampCreate implements UnitedCommandExecutor {
 
         WarcampUtils.place(location.getChunk());
 
-        WarManager.instance().refreshCache();
+        WarManager.instance().addWarZone(warcamp);
         SiegeManager.instance().updateSieges();
         WarManager.instance().getDatabaseManager().getWarZoneService().createAsync(warcamp);
 

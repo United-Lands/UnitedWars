@@ -39,7 +39,6 @@ public class SiegeManager {
         CompletableFuture<List<SiegeChunk>> siegeChunksFuture = databaseManager.getSiegeChunkService().getAllAsync();
 
         try {
-            // Wait for the query, then build the cache on the calling (main) thread
             buildSiegeChunks(siegeChunksFuture.get());
         } catch (Exception ex) {
             United.logger().error("Loading failed: " + ex.getMessage(), "UnitedWars");
@@ -50,8 +49,7 @@ public class SiegeManager {
     private void buildSiegeChunks(List<SiegeChunk> loadedSiegeChunks) {
         Set<SiegeChunk> orphanedChunks = new HashSet<>();
         for (var siegeChunk : loadedSiegeChunks) {
-            // Chunks of wars that are no longer loaded (ended, or left over from a
-            // failed cleanup) would block new sieges at the same coordinates.
+            // Chunks of wars that are no longer loaded would block new sieges at the same coordinates.
             if (WarManager.instance().getWar(siegeChunk.getWarId()) == null) {
                 orphanedChunks.add(siegeChunk);
                 continue;
@@ -67,7 +65,6 @@ public class SiegeManager {
     }
 
     public void handleSiegeChunks() {
-        // Iterate a copy: health changes fire events whose listeners may change sieges
         for (var siegeChunk : new ArrayList<>(activeSiegeChunks)) {
             siegeChunk.updateHealth();
             SiegeChunkDisplayManager.instance().updateHealthBar(siegeChunk);
@@ -75,10 +72,6 @@ public class SiegeManager {
         saveChangedSiegeChunks();
     }
 
-    /**
-     * Writes all dirty siege chunks, including ones that became inactive after a
-     * failed write. The dirty flag is set again if the write fails.
-     */
     public void saveChangedSiegeChunks() {
         for (var siegeChunk : siegeChunks.values()) {
             if (!siegeChunk.stateChanged())
@@ -89,10 +82,6 @@ public class SiegeManager {
         }
     }
 
-    /**
-     * Removes a player from every siege chunk. Movement events don't fire on quit,
-     * so without this an offline player would keep counting towards a siege.
-     */
     public void removePlayerFromAllSiegeChunks(Player player) {
         for (var siegeChunk : new ArrayList<>(activeSiegeChunks)) {
             siegeChunk.removePlayer(player);
@@ -114,16 +103,16 @@ public class SiegeManager {
 
     public void updatePlayersInChunk(Player player, Coordinates fromCoordinates, Coordinates toCoordinates) {
 
+        if (fromCoordinates != null && siegeChunks.containsKey(fromCoordinates)) {
+            removePlayerFromSiegeChunk(player, fromCoordinates);
+        }
+
         // TODO: Reactivate!!
 
         // if (player.getGameMode() != GameMode.SURVIVAL)
         // return;
         if (player.hasPotionEffect(PotionEffectType.INVISIBILITY) || player.isInvisible())
             return;
-
-        if (fromCoordinates != null && siegeChunks.containsKey(fromCoordinates)) {
-            removePlayerFromSiegeChunk(player, fromCoordinates);
-        }
 
         if (toCoordinates != null) {
             if (!siegeChunks.containsKey(toCoordinates)) {
@@ -152,7 +141,6 @@ public class SiegeManager {
                 }
 
                 siegeChunks.put(toCoordinates, siegeChunk);
-                // The create writes the current state, no follow-up update needed
                 siegeChunk.setStateChanged(false);
                 databaseManager.getSiegeChunkService().createAsync(siegeChunk);
 
@@ -202,8 +190,6 @@ public class SiegeManager {
 
     public void cleanupSiegeChunks(War war) {
 
-        // Compare by id: the war has already been removed from the WarManager cache
-        // here, so resolving a chunk's war lazily would return null.
         Set<SiegeChunk> warSiegeChunks = siegeChunks.values().stream()
                 .filter(c -> war.getUuid().equals(c.getWarId()))
                 .collect(Collectors.toSet());

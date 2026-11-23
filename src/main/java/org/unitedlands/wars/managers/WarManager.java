@@ -94,13 +94,8 @@ public class WarManager {
             buildWarfactions(warFactionsFuture.join());
             buildWarZones(warZonesFuture.join());
 
+            // Markers of active wars are rendered in buildWarZones
             SiegeManager.instance().loadSiegeChunks();
-
-            for (var zone : warZones.values()) {
-                if (zone.getWar().isActive()) {
-                    zone.renderMarkers();
-                }
-            }
 
         } catch (Exception ex) {
             United.logger().error("Loading failed: " + ex.getMessage(), "UnitedWars");
@@ -150,7 +145,7 @@ public class WarManager {
                 var settlementZone = zone.asSettlementWarZone();
                 settlementZone.generateAreas();
                 if (war.isActive())
-                    zone.renderMarkers();
+                    settlementZone.renderMarkers();
                 addWarZone(settlementZone);
                 break;
             case "region":
@@ -169,8 +164,6 @@ public class WarManager {
                 break;
             }
 
-            // Converting to the concrete zone type goes through the setters, which
-            // flag the zone as dirty. The loaded state matches the database.
             var cachedZone = getWarZone(zone.getUuid());
             if (cachedZone != null)
                 cachedZone.setStateChanged(false);
@@ -216,11 +209,6 @@ public class WarManager {
         saveChangedData();
     }
 
-    /**
-     * Writes all dirty wars, war zones and war factions. The dirty flag is cleared
-     * before the write is queued (the service snapshots the entity at that point)
-     * and set again if the write fails, so the next cycle retries it.
-     */
     public void saveChangedData() {
         for (var war : getWars()) {
             if (war.stateChanged()) {
@@ -340,20 +328,6 @@ public class WarManager {
 
     public boolean anyWarsActive() {
         return activeWars.size() > 0;
-    }
-
-    public void refreshCache() {
-
-        warZones = new HashMap<>();
-        warFactions = new HashMap<>();
-
-        for (var war : getWars()) {
-            for (var faction : war.getWarFactions())
-                addWarFaction(faction);
-            for (var zone : war.getWarZones())
-                addWarZone(zone);
-        }
-        
     }
 
     public void validateMetaData(Player player) {

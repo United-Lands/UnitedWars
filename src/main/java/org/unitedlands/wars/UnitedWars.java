@@ -38,7 +38,13 @@ public class UnitedWars extends JavaPlugin {
 
         saveDefaultConfig();
 
-        createManagers();
+        try {
+            createManagers();
+        } catch (RuntimeException ex) {
+            United.logger().error("Could not initialize UnitedWars, disabling plugin: " + ex.getMessage(), "UnitedWars");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         registerListeners();
 
@@ -50,14 +56,12 @@ public class UnitedWars extends JavaPlugin {
     @Override
     public void onDisable() {
 
-        // Stop the scheduler first so no new changes are produced
         if (WarScheduler.instance() != null)
             WarScheduler.instance().shutdown();
 
         if (databaseManager == null)
             return;
 
-        // Flush everything that changed since the last scheduler run
         try {
             if (WarManager.instance() != null)
                 WarManager.instance().saveChangedData();
@@ -67,8 +71,6 @@ public class UnitedWars extends JavaPlugin {
             United.logger().error("Could not flush war data on shutdown: " + ex.getMessage(), "UnitedWars");
         }
 
-        // The write executor is shared with other UnitedLib plugins and shut down by
-        // UnitedLib. Only wait for our own writes before closing the pool they use.
         if (databaseManager.getConnectionSource() != null)
             BaseDbService.awaitPendingWrites(databaseManager.getConnectionSource(), 30);
 

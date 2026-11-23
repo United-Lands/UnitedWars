@@ -29,6 +29,7 @@ import org.unitedlands.wars.classes.warzone.WarZoneWarcamp;
 import org.unitedlands.wars.events.WarScoreEvent;
 import org.unitedlands.wars.managers.WarManager;
 import org.unitedlands.wars.managers.WarMetaDataManager;
+import org.unitedlands.wars.utils.Serializers;
 
 public class War implements Identifiable {
 
@@ -233,7 +234,7 @@ public class War implements Identifiable {
 
     public Set<WarFaction> getWarFactions() {
         if (this.warFactions == null) {
-            this.warFactions = SerializationUtils.deserializeUuidListToSet(warFactionsSerialized, WarManager.instance()::getWarFaction);
+            this.warFactions = Serializers.deserializeUuidSet(warFactionsSerialized, WarManager.instance()::getWarFaction, "war factions of war " + uuid);
         }
         return this.warFactions;
     }
@@ -270,7 +271,7 @@ public class War implements Identifiable {
 
     public Set<WarZone> getWarZones() {
         if (this.warZones == null) {
-            this.warZones = SerializationUtils.deserializeUuidListToSet(warZonesSerialized, WarManager.instance()::getWarZone);
+            this.warZones = Serializers.deserializeUuidSet(warZonesSerialized, WarManager.instance()::getWarZone, "war zones of war " + uuid);
         }
         return this.warZones;
     }
