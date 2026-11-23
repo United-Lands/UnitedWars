@@ -351,31 +351,9 @@ public class War implements Identifiable {
         if (!active)
             return false;
 
-        var currentTime = System.currentTimeMillis();
-
-        // See if time has run out
-        if (scheduledEndTime <= currentTime) {
-            WarFaction winner = null;
-            // Determine winner by highest score. If there is more than one faction with the
-            // highest score, no one wins.
-            int highestScore = Integer.MIN_VALUE;
-            for (var faction : getWarFactions()) {
-                if (faction.getScore() == highestScore) {
-                    // We have a faction that has the same score as another faction.
-                    // No one wins.
-                    winner = null;
-                } else if (faction.getScore() > highestScore) {
-                    highestScore = faction.getScore();
-                    winner = faction;
-                }
-            }
-            setWinningFaction(winner);
-            return true;
-        }
-
-        // Check all losing conditions
-
         for (var faction : getWarFactions()) {
+            if (faction.hasLost())
+                continue;
 
             for (var entry : faction.getLoseConditions().entrySet()) {
 
@@ -387,16 +365,43 @@ public class War implements Identifiable {
                 if (condition.evaluate(faction, entry.getValue())) {
                     faction.setLost(true);
                     // TODO: Trigger faction lost event?
+                    break;
                 }
             }
         }
 
-        // Check all winning conditions
+        var remainingFactions = getWarFactions().stream().filter(f -> !f.hasLost()).toList();
+
+        if (remainingFactions.isEmpty()) {
+            setWinningFaction(null);
+            return true;
+        }
+
+        if (remainingFactions.size() == 1) {
+            setWinningFaction(remainingFactions.getFirst());
+            setWinningCondition("last_faction_alive");
+            return true;
+        }
+
+        if (scheduledEndTime <= System.currentTimeMillis()) {
+            WarFaction winner = null;
+            int highestScore = Integer.MIN_VALUE;
+            for (var faction : remainingFactions) {
+                if (faction.getScore() == highestScore) {
+                    winner = null;
+                } else if (faction.getScore() > highestScore) {
+                    highestScore = faction.getScore();
+                    winner = faction;
+                }
+            }
+            setWinningFaction(winner);
+            return true;
+        }
 
         List<WarFaction> winners = new ArrayList<>();
         List<String> winningConditions = new ArrayList<>();
 
-        for (var faction : getWarFactions()) {
+        for (var faction : remainingFactions) {
 
             for (var entry : faction.getWinConditions().entrySet()) {
 
@@ -426,8 +431,7 @@ public class War implements Identifiable {
             }
             return true;
         } else if (winners.size() > 1) {
-            // Multiple simultaneous winners. End the war, but don't declare a winning
-            // faction
+            setWinningFaction(null);
             return true;
         }
 

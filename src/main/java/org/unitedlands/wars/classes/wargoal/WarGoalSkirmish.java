@@ -57,7 +57,6 @@ public class WarGoalSkirmish extends WarGoal {
         declarerFaction.addSettlement(declaringSettlement);
 
         declarerFaction.addWinCondition("reach_score", declarerScoreCap);
-        declarerFaction.addWinCondition("last_faction_alive");
         declarerFaction.addWinCondition("own_all_war_zones");
         declarerFaction.addLoseCondition("own_no_war_zones");
 
@@ -70,7 +69,6 @@ public class WarGoalSkirmish extends WarGoal {
         targetFaction.addSettlement(targeSettlement);
 
         targetFaction.addWinCondition("reach_score", targetScoreCap);
-        targetFaction.addWinCondition("last_faction_alive");
         targetFaction.addWinCondition("own_all_war_zones");
         targetFaction.addLoseCondition("own_no_war_zones");
 

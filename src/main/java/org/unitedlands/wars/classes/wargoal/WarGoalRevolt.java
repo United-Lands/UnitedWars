@@ -91,7 +91,6 @@ public class WarGoalRevolt extends WarGoal {
         targetFaction.setFactionLeaderId(targetCountry.getUuid());
         targetFaction.addCountry(targetCountry);
         targetFaction.addWinCondition("reach_score", targetScoreCap);
-        targetFaction.addWinCondition("last_faction_alive");
         targetFaction.addWinCondition("own_all_war_zones");
 
         factions.add(targetFaction);
