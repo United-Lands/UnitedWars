@@ -6,6 +6,7 @@ import org.unitedlands.unitedlands.integrations.Pl3xMap.Pl3xMapRenderer;
 import org.unitedlands.unitedlands.utils.CoordinateUtils;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
+import org.unitedlands.wars.classes.war.SiegeChunk;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 
 public class WarZoneWarcamp extends WarZone {
@@ -17,6 +18,17 @@ public class WarZoneWarcamp extends WarZone {
     @Override
     public String getName() {
         return "Warcamp (" + getFaction().getCleanName() + ")";
+    }
+
+    @Override
+    public boolean isObjective() {
+        return false;
+    }
+
+    @Override
+    public void onSiegeChunkCaptured(SiegeChunk siegeChunk) {
+        if (siegeChunk.getOwner() != null)
+            setOccupier(siegeChunk.getOwner());
     }
 
     @Override

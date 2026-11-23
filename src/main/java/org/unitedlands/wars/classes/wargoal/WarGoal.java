@@ -1,9 +1,12 @@
 package org.unitedlands.wars.classes.wargoal;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.util.Vector;
+import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
@@ -38,6 +41,9 @@ public abstract class WarGoal {
 
     public abstract void resolve(War war);
 
+    public void onWarRegistered(War war) {
+    }
+
     public WarZone createSettlementZone(War war, WarFaction owningFaction, Settlement settlement) {
         var settlementZone = new WarZoneSettlement();
         settlementZone.setUuid(UUID.randomUUID());
@@ -62,6 +68,79 @@ public abstract class WarGoal {
         }
         regionZone.generateAreas();
         return regionZone;
+    }
+
+    protected Set<WarZone> createRegionTargetZones(War war, WarFaction owningFaction, Region region) {
+        Set<WarZone> zones = new HashSet<>();
+        var countrySettlements = region.getSettlements().stream().filter(s -> s.hasCountry()).toList();
+        if (countrySettlements.isEmpty()) {
+            zones.add(createRegionZone(war, owningFaction, region));
+        } else {
+            for (var settlement : countrySettlements) {
+                zones.add(createSettlementZone(war, owningFaction, settlement));
+            }
+        }
+        return zones;
+    }
+
+    protected Set<WarZone> createCounterAttackZones(War war, WarFaction owningFaction, Country country, Vector origin, Region excludedRegion) {
+        Region closestRegion = null;
+        double closestDistance = Double.POSITIVE_INFINITY;
+        for (var region : country.getRegions()) {
+            if (region.equals(excludedRegion))
+                continue;
+            var regionHome = new Vector(region.getHomeChunkCoordinatesX(), 0, region.getHomeChunkCoordinatesZ());
+            var dist = origin.distanceSquared(regionHome);
+            if (dist < closestDistance) {
+                closestDistance = dist;
+                closestRegion = region;
+            }
+        }
+
+        if (closestRegion != null)
+            return createRegionTargetZones(war, owningFaction, closestRegion);
+
+        Set<WarZone> zones = new HashSet<>();
+        if (excludedRegion != null) {
+            for (var settlement : excludedRegion.getSettlements()) {
+                if (settlement.hasCountry() && country.equals(settlement.getCountry()))
+                    zones.add(createSettlementZone(war, owningFaction, settlement));
+            }
+        }
+        return zones;
+    }
+
+    protected void transferRegion(Region region, Country newCountry) {
+        var oldCountry = region.getCountry();
+        if (oldCountry != null)
+            oldCountry.removeRegion(region);
+
+        if (newCountry != null) {
+            region.setCountry(newCountry);
+            newCountry.addRegion(region);
+        } else {
+            region.removeCountry();
+        }
+        region.saveAndRender();
+    }
+
+    protected void transferSettlement(Settlement settlement, Country newCountry) {
+        var oldCountry = settlement.getCountry();
+        if (oldCountry != null) {
+            oldCountry.removeSettlement(settlement);
+            for (var citizen : settlement.getCitizens()) {
+                citizen.removeCountryRanks();
+                citizen.save();
+            }
+        }
+
+        if (newCountry != null) {
+            settlement.setCountry(newCountry);
+            newCountry.addSettlement(settlement);
+        } else {
+            settlement.removeCountry();
+        }
+        settlement.saveAndRender();
     }
 
     public WarZone createWarcampZone(War war, WarFaction owningFaction) {

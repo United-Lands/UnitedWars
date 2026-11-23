@@ -155,6 +155,9 @@ siege-settings:
   health-decay-rate: 1
   # The amount of HP a chunk heals when the defenders are in a majority
   health-restore-rate: 1
+  # Percentage of max health a non-occupiable chunk (e.g. war camps) is reset to after being captured,
+  # so the previous owner can't recapture it instantly. Always at least 1 HP.
+  capture-health-reset-percent: 25
   # Initial max health points for chunk types
   chunk-max-health:
     default: 

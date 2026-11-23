@@ -60,6 +60,7 @@ public class WarcampUtils {
 
     }
 
+    @SuppressWarnings("deprecation")
     private static Clipboard loadRandomTemplate() {
 
         int numTemplates = UnitedWarsConfig.get().siegeSettings().warcampTemplates();

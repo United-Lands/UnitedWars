@@ -11,7 +11,7 @@ public class WarConditionOwnAllWarZones extends WarCondition {
 
     @Override
     public boolean evaluate(WarFaction faction, Integer param) {
-        var warZones = faction.getWar().getWarZones();
+        var warZones = faction.getWar().getObjectiveWarZones();
         return warZones.stream().allMatch(z -> faction.equals(z.getOccupier()));
     }
 

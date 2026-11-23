@@ -13,7 +13,7 @@ public class WarConditionOwnMinimumWarZones extends WarCondition {
 
     @Override
     public boolean evaluate(WarFaction faction, Integer param) {
-        var warZones = faction.getWar().getWarZones();
+        var warZones = faction.getWar().getObjectiveWarZones();
         var controlledZones = warZones.stream().filter(z -> faction.equals(z.getOccupier()))
                 .collect(Collectors.counting());
         return controlledZones >= param;

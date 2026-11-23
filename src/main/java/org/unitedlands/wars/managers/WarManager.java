@@ -257,6 +257,8 @@ public class WarManager {
         databaseManager.getWarZoneService().createAllAsync(war.getWarZones());
         databaseManager.getWarService().createAsync(war);
 
+        war.getWarGoal().onWarRegistered(war);
+
         war.refreshOnlinePlayerFactions();
 
         WarRegisteredEvent warRegisteredEvent = new WarRegisteredEvent(war);

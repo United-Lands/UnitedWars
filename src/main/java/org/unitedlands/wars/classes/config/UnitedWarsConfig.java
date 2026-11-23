@@ -70,6 +70,7 @@ public interface UnitedWarsConfig extends UnitedConfigHandler  {
         @UnitedSetting(key = "use-superiority-multiplier",      def = "true")   boolean                 useSuperiorityMultiplier,
         @UnitedSetting(key = "health-decay-rate",               def = "1")      int                     healthDecayRate,
         @UnitedSetting(key = "health-restore-rate",             def = "1")      int                     healthRestoreRate,
+        @UnitedSetting(key = "capture-health-reset-percent",    def = "25")     int                     captureHealthResetPercent,
         @UnitedSection(key = "chunk-max-health")                                UnitedDynamicSection<GeneralIntValueSetting> chunkMaxHealth,
         @UnitedSetting(key = "disabled-commands",               def = "")       List<String> disabledCommands
     ) { }

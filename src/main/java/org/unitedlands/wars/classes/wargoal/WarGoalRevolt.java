@@ -40,6 +40,12 @@ public class WarGoalRevolt extends WarGoal {
             if (!region.hasCountry()) {
                 return new ValidationResult(false, "The target region doesn't belong to a country.");
             }
+            if (!region.getCountry().equals(settlement.getCountry())) {
+                return new ValidationResult(false, "The target region doesn't belong to the settlement's country.");
+            }
+            if (settlement.equals(settlement.getCountry().getCapital())) {
+                return new ValidationResult(false, "A country's capital can't revolt.");
+            }
 
              // Trigger external validation (e.g. in UnitedPolitics)
             var externalValidationEvent = new WarGoalValidationEvent(this, settlement, region.getCountry());
@@ -59,15 +65,6 @@ public class WarGoalRevolt extends WarGoal {
         Set<WarFaction> factions = new HashSet<>();
 
         var declaringSettlement = (Settlement) declarer;
-
-        // Remove the revolting town from the nation. If the revolt fails, they will be
-        // put back.
-        for (var citizen : declaringSettlement.getCitizens()) {
-            citizen.removeCountryRanks();
-            citizen.save();
-        }
-        declaringSettlement.removeCountry();
-        declaringSettlement.saveAndRender();
 
         var declarerScoreCap = UnitedWarsConfig.get().warGoalSettings().get("revolt").scoreCaps().get("attacker").val();
 
@@ -100,6 +97,26 @@ public class WarGoalRevolt extends WarGoal {
         factions.add(targetFaction);
 
         return factions;
+    }
+
+    @Override
+    public void onWarRegistered(War war) {
+        var attackerFaction = war.getWarFaction(WarFactionRole.ATTACKER);
+        if (attackerFaction == null) {
+            United.logger().error("No attacker faction found in revolt war goal registration.");
+            return;
+        }
+
+        var revoltingSettlement = UnitedLandsDataManager.instance().getSettlement(attackerFaction.getFactionLeaderId());
+        if (revoltingSettlement == null) {
+            United.logger().error("No declaring settlement found in revolt war goal registration.");
+            return;
+        }
+
+        for (var citizen : revoltingSettlement.getCitizens()) {
+            citizen.removeCountryRanks();
+            citizen.save();
+        }
     }
 
     @Override
@@ -143,31 +160,37 @@ public class WarGoalRevolt extends WarGoal {
             var country = region.getCountry();
 
             if (war.getWinningFaction() == null || !war.getWinningFaction().equals(attackerFactions.getFirst())) {
-                // The revolt has failed. Force the settlement back into the nation and apply
-                // cooldowns.
                 // TODO Cooldowns
-                attackingSettlement.setCountry(country);
-                attackingSettlement.saveAndRender();
+            } else if (country.getCapital() != null && region.equals(country.getCapital().getRegion())) {
+                takeOverCountry(country, attackingSettlement);
             } else {
-                // The revolt was a success. Liberate all nation towns in the region and clear
-                // the region owner.
-                for (var settlement : region.getSettlements()) {
-                    if (!settlement.hasCountry())
-                        continue;
-                    for (var citizen : settlement.getCitizens()) {
-                        citizen.removeCountryRanks();
-                        citizen.save();
-                    }
-                    settlement.removeCountry();
-                    settlement.saveAndRender();
+                for (var settlement : region.getSettlements(country)) {
+                    transferSettlement(settlement, null);
                 }
-                region.removeCountry();
-                region.saveAndRender();
-                country.removeRegion(region);
+                transferRegion(region, null);
                 country.saveAndRender();
             }
 
         }
+    }
+
+    private void takeOverCountry(Country country, Settlement revoltingSettlement) {
+        country.setCapital(revoltingSettlement);
+
+        for (var citizen : country.getCitizens()) {
+            citizen.removeCountryRanks();
+            citizen.save();
+        }
+
+        var newLeader = revoltingSettlement.getMayor();
+        if (newLeader != null) {
+            newLeader.addCountryRank("leader");
+            newLeader.save();
+        } else {
+            United.logger().warning("Revolting settlement " + revoltingSettlement.getName() + " has no mayor, country " + country.getName() + " is left without a leader.");
+        }
+
+        country.saveAndRender();
     }
 
     @Override

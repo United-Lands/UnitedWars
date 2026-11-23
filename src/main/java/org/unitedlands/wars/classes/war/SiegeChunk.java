@@ -322,8 +322,11 @@ public class SiegeChunk implements Identifiable {
             // will be set to fully occupied and can't be reconquered.
             if (isOccupiable()) {
                 setOccupied(true);
-                getWarZone().checkOccupation();
+            } else {
+                var resetPercent = UnitedWarsConfig.get().siegeSettings().captureHealthResetPercent();
+                currentHealth = Math.max(1, Math.min(maxHealth, maxHealth * resetPercent / 100));
             }
+            getWarZone().onSiegeChunkCaptured(this);
 
             var capturingPlayer = playersInChunk.get(leadingFaction).getFirst();
             var captureEvent = new WarScoreEvent(getWar(), capturingPlayer, leadingFaction, WarScoreType.SIEGE_CHUNK_CAPTURE, getScoreValue());

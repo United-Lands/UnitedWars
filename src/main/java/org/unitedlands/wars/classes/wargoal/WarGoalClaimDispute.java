@@ -5,6 +5,7 @@ import java.util.Set;
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
+import org.unitedlands.unitedlands.classes.events.region.RegionClaimedEvent;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;
@@ -96,14 +97,7 @@ public class WarGoalClaimDispute extends WarGoal {
         if (war.getWinningFaction() == null)
             return;
 
-        // Claim disputed only have one war zone (the disputed region)
-        if (war.getWarZones().size() != 1) {
-            United.logger().error("Too many war zones for war goal claim-dispute", "UnitedWars");
-            return;
-        }
-
-        var zone = (war.getWarZones().stream().findFirst()).get();
-        var region = UnitedLandsDataManager.instance().getRegion(zone.getGeopolObjectId());
+        var region = UnitedLandsDataManager.instance().getRegion(war.getWarTargetId());
         if (region == null) {
             United.logger().error("Could not get region for war goal claim-dispute", "UnitedWars");
             return;
@@ -116,10 +110,15 @@ public class WarGoalClaimDispute extends WarGoal {
             return;
         }
 
-        region.setCountry(country);
-        region.saveAndRender();
-        country.addRegion(region);
+        var previousCountry = region.getCountry();
+
+        region.setAdministrator(country.getLeader());
+        transferRegion(region, country);
         country.saveAndRender();
+        if (previousCountry != null && !previousCountry.equals(country))
+            previousCountry.saveAndRender();
+
+        new RegionClaimedEvent(region, country).callEvent();
     }
 
 

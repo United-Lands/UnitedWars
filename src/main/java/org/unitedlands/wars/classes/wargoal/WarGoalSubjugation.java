@@ -5,7 +5,6 @@ import java.util.Set;
 import org.bukkit.util.Vector;
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
-import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
@@ -114,33 +113,14 @@ public class WarGoalSubjugation extends WarGoal {
         }
 
         var settlement = (Settlement) target;
-        Vector settlementHome = new Vector(settlement.getHomeChunkCoordinatesX(), 0, settlement.getHomeChunkCoordinatesZ());
+        var settlementHome = new Vector(settlement.getHomeChunkCoordinatesX(), 0, settlement.getHomeChunkCoordinatesZ());
 
-        Region closestAttackerRegion = null;
-        Double closestDistance = Double.POSITIVE_INFINITY;
-        for (var attackerRegion : attackerCountry.getRegions()) {
-            if (attackerRegion.equals(settlement.getRegion()))
-                continue;
-            Vector attackerRegionHome = new Vector(attackerRegion.getHomeChunkCoordinatesX(), 0, attackerRegion.getHomeChunkCoordinatesZ());
-            var dist = settlementHome.distanceSquared(attackerRegionHome);
-            if (dist < closestDistance) {
-                closestDistance = dist;
-                closestAttackerRegion = attackerRegion;
-            }
+        var counterAttackZones = createCounterAttackZones(war, attackerFactions.getFirst(), attackerCountry, settlementHome, settlement.getRegion());
+        if (counterAttackZones.isEmpty()) {
+            United.logger().error("No counter attack zones found for attacking country in war goal subjugation.", "UnitedWars");
+            return new HashSet<>();
         }
-
-        if (closestAttackerRegion.getSettlements().size() > 0) {
-            var attackerCountrySettlements = closestAttackerRegion.getSettlements().stream().filter(s -> s.hasCountry()).toList();
-            if (attackerCountrySettlements.size() > 0) {
-                for (var attackerCountrySettlement : attackerCountrySettlements) {
-                    zones.add(createSettlementZone(war, attackerFactions.getFirst(), attackerCountrySettlement));
-                }
-            } else {
-                zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion));
-            }
-        } else {
-            zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion));
-        }
+        zones.addAll(counterAttackZones);
 
         return zones;
     }
@@ -169,8 +149,13 @@ public class WarGoalSubjugation extends WarGoal {
             return;
         }
 
-        settlement.setCountry(country);
-        settlement.saveAndRender();
+        if (settlement.hasCountry()) {
+            United.logger().error("Target settlement already belongs to a country in war goal subjugation", "UnitedWars");
+            return;
+        }
+
+        transferSettlement(settlement, country);
+        country.saveAndRender();
     }
 
     

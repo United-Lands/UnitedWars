@@ -16,6 +16,7 @@ import org.unitedlands.classes.database.Identifiable;
 import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.libs.ormlite.table.DatabaseTable;
 import org.unitedlands.utils.United;
+import org.unitedlands.wars.classes.war.SiegeChunk;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.managers.SiegeManager;
@@ -195,6 +196,15 @@ public class WarZone implements Identifiable {
 
     public void setSiegeEnabled(boolean siegeEnabled) {
         this.siegeEnabled = siegeEnabled;
+    }
+
+    public boolean isObjective() {
+        return true;
+    }
+
+    public void onSiegeChunkCaptured(SiegeChunk siegeChunk) {
+        if (siegeChunk.isOccupiable())
+            checkOccupation();
     }
 
     public void checkOccupation() {

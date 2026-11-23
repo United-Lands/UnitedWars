@@ -276,6 +276,10 @@ public class War implements Identifiable {
         return this.warZones;
     }
 
+    public Set<WarZone> getObjectiveWarZones() {
+        return getWarZones().stream().filter(WarZone::isObjective).collect(Collectors.toSet());
+    }
+
     public void setWarZones(Set<WarZone> warZones) {
         this.warZones = warZones;
         this.warZonesSerialized = SerializationUtils.serializeIdentifiableList(warZones);
@@ -310,7 +314,7 @@ public class War implements Identifiable {
         war.setWarFactions(factions);
 
         var warZones = warGoal.createWarZones(declarer, target, war);
-        if (warZones == null) {
+        if (warZones == null || warZones.isEmpty()) {
             United.logger().error("Could not create war zones, cancelling war creation.");
             return null;
         }
@@ -488,9 +492,7 @@ public class War implements Identifiable {
             // does NOT belong to the player's faction
             if (warZone == null)
                 continue;
-            if (warZone.isOccupied() && playerFactionEntry.getValue().equals(warZone.getOccupier()))
-                continue;
-            if (!warZone.isOccupied() && playerFactionEntry.getValue().equals(warZone.getFaction()))
+            if (playerFactionEntry.getValue().equals(warZone.getOccupier()))
                 continue;
 
             var activityScoreEvent = new WarScoreEvent(this, playerFactionEntry.getKey(), playerFactionEntry.getValue(), WarScoreType.ACTIVITY, activityPoints);
@@ -522,23 +524,21 @@ public class War implements Identifiable {
     }
 
     private WarFaction getFaction(Citizen citizen) {
+        var settlement = citizen.getSettlement();
         for (var faction : getWarFactions()) {
-            for (var settlement : faction.getSettlements()) {
-                if (settlement.equals(citizen.getSettlement())) {
-                    return faction;
-                }
-            }
-            for (var country : faction.getCountries()) {
-                if (!citizen.getSettlement().hasCountry())
-                    continue;
-                if (country.equals(citizen.getSettlement().getCountry()))
+            if (faction.getSettlements().stream().anyMatch(s -> s.equals(settlement)))
+                return faction;
+        }
+        if (settlement.hasCountry()) {
+            var country = settlement.getCountry();
+            for (var faction : getWarFactions()) {
+                if (faction.getCountries().stream().anyMatch(c -> c.equals(country)))
                     return faction;
             }
-            for (var mercenary : faction.getMercenaries()) {
-                if (citizen.equals(mercenary)) {
-                    return faction;
-                }
-            }
+        }
+        for (var faction : getWarFactions()) {
+            if (faction.getMercenaries().stream().anyMatch(m -> m.equals(citizen)))
+                return faction;
         }
         return null;
     }

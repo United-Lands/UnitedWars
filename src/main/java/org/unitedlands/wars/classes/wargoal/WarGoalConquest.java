@@ -108,18 +108,7 @@ public class WarGoalConquest extends WarGoal {
 
         // If the target region has one or more nation towns, those will be the target
         // of the conquest. Otherwise the region center will be the war zone.
-        if (targetRegion.getSettlements().size() > 0) {
-            var countrySettlements = targetRegion.getSettlements().stream().filter(s -> s.hasCountry()).toList();
-            if (countrySettlements.size() > 0) {
-                for (var countrySettlement : countrySettlements) {
-                    zones.add(createSettlementZone(war, defenderFactions.getFirst(), countrySettlement));
-                }
-            } else {
-                zones.add(createRegionZone(war, defenderFactions.getFirst(), targetRegion));
-            }
-        } else {
-            zones.add(createRegionZone(war, defenderFactions.getFirst(), targetRegion));
-        }
+        zones.addAll(createRegionTargetZones(war, defenderFactions.getFirst(), targetRegion));
 
         // To allow counter attacks for the defenders, find the attacker region that is
         // closest to the target region and also make it a war zone according to the
@@ -130,31 +119,14 @@ public class WarGoalConquest extends WarGoal {
             return new HashSet<>();
         }
 
-        Vector targetRegionHome = new Vector(targetRegion.getHomeChunkCoordinatesX(), 0, targetRegion.getHomeChunkCoordinatesZ());
+        var targetRegionHome = new Vector(targetRegion.getHomeChunkCoordinatesX(), 0, targetRegion.getHomeChunkCoordinatesZ());
 
-        Region closestAttackerRegion = null;
-        Double closestDistance = Double.POSITIVE_INFINITY;
-        for (var attackerRegion : attackerCountry.getRegions()) {
-            Vector attackerRegionHome = new Vector(attackerRegion.getHomeChunkCoordinatesX(), 0, attackerRegion.getHomeChunkCoordinatesZ());
-            var dist = targetRegionHome.distanceSquared(attackerRegionHome);
-            if (dist < closestDistance) {
-                closestDistance = dist;
-                closestAttackerRegion = attackerRegion;
-            }
+        var counterAttackZones = createCounterAttackZones(war, attackerFactions.getFirst(), attackerCountry, targetRegionHome, null);
+        if (counterAttackZones.isEmpty()) {
+            United.logger().error("No counter attack zones found for attacking country in war goal conquest.", "UnitedWars");
+            return new HashSet<>();
         }
-
-        if (closestAttackerRegion.getSettlements().size() > 0) {
-            var attackerCountrySettlements = closestAttackerRegion.getSettlements().stream().filter(s -> s.hasCountry()).toList();
-            if (attackerCountrySettlements.size() > 0) {
-                for (var attackerCountrySettlement : attackerCountrySettlements) {
-                    zones.add(createSettlementZone(war, attackerFactions.getFirst(), attackerCountrySettlement));
-                }
-            } else {
-                zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion));
-            }
-        } else {
-            zones.add(createRegionZone(war, attackerFactions.getFirst(), closestAttackerRegion));
-        }
+        zones.addAll(counterAttackZones);
 
         return zones;
     }
@@ -184,52 +156,34 @@ public class WarGoalConquest extends WarGoal {
         }
 
         var losingCountry = conqueredRegion.getCountry();
-
-        losingCountry.removeRegion(conqueredRegion);
-        losingCountry.saveAndRender();
-
-        winningCountry.addRegion(conqueredRegion);
-        conqueredRegion.setCountry(winningCountry);
-        for (var settlement : conqueredRegion.getSettlements()) {
-            if (settlement.hasCountry()) {
-                for (var citizen : settlement.getCitizens()) {
-                    citizen.removeCountryRanks();
-                    citizen.save();
-                }
-                settlement.setCountry(winningCountry);
-                settlement.saveAndRender();
-
-                losingCountry.removeSettlement(settlement);
-            }
+        if (losingCountry == null || losingCountry.equals(winningCountry)) {
+            United.logger().error("Conquered region has no losing country in war goal conquest", "UnitedWars");
+            return;
         }
-        conqueredRegion.saveAndRender();
+
+        transferRegion(conqueredRegion, winningCountry);
+        for (var settlement : conqueredRegion.getSettlements(losingCountry)) {
+            transferSettlement(settlement, winningCountry);
+        }
         winningCountry.saveAndRender();
 
-        // See if the defeated country still has regions left. If not, delete it.
         if (losingCountry.getRegionCount() == 0) {
             United.logger().debug("Country " + losingCountry.getName() + " has lost its last region, removing.");
-            // The country has lost its last region and will be removed.
             removeCountry(winningCountry, losingCountry);
-
-        } else {
-
-            // Check if the defeated country's capital was in the conquered region. If so,
-            // select a random other capital. If the country doesn't have any more
-            // settlements, remove it.
-            var capital = losingCountry.getCapital();
-            if (capital.getRegion().equals(conqueredRegion)) {
-                var newCapital = losingCountry.getSettlements().stream().findAny().orElse(null);
-                if (newCapital != null) {
-                    losingCountry.setCapital(newCapital);
-                    losingCountry.saveAndRender();
-                } else {
-                    United.logger().debug("Country " + losingCountry.getName() + " has lost its last settlement, removing.");
-                    // The country has no more settlements and wil be removed.
-                    removeCountry(winningCountry, losingCountry);
-                }
-            }
+            return;
         }
 
+        var capital = losingCountry.getCapital();
+        if (capital == null || conqueredRegion.equals(capital.getRegion())) {
+            var newCapital = losingCountry.getSettlements().stream().findAny().orElse(null);
+            if (newCapital == null) {
+                United.logger().debug("Country " + losingCountry.getName() + " has lost its last settlement, removing.");
+                removeCountry(winningCountry, losingCountry);
+                return;
+            }
+            losingCountry.setCapital(newCapital);
+        }
+        losingCountry.saveAndRender();
     }
 
     private void removeCountry(Country winningCountry, Country losingCountry) {
