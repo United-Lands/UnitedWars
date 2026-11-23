@@ -16,7 +16,7 @@ import org.unitedlands.wars.managers.WarManager;
     usage = "/war info <war>", 
     playerOnly = true
 )
-public class WarInfoCommand implements UnitedCommandExecutor {
+public class CmdWarInfo implements UnitedCommandExecutor {
 
     @Override
     public List<String> handleTab(CommandSender sender, String[] args) {

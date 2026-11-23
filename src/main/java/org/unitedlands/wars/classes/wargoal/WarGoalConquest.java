@@ -2,7 +2,9 @@ package org.unitedlands.wars.classes.wargoal;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import org.bukkit.util.Vector;
+import org.unitedlands.unitedlands.classes.BankRecordTransactionType;
 import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
@@ -15,7 +17,8 @@ import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
-import org.unitedlands.wars.events.WarPreJoinEvent;
+import org.unitedlands.wars.events.WarInviteEvent;
+import org.unitedlands.wars.managers.WarManager;
 
 public class WarGoalConquest extends WarGoal {
 
@@ -233,29 +236,38 @@ public class WarGoalConquest extends WarGoal {
 
         // Remaining money will go to the winning country
         UnitedLandsEconomyManager.instance().deposit(winningCountry.getUuid(), UnitedLandsEconomyManager.instance().getBalance(losingCountry.getUuid()),
-                "Dismanteled " + losingCountry.getCleanName());
+               BankRecordTransactionType.WAR, "Dismanteled " + losingCountry.getCleanName());
 
         UnitedLandsDataManager.instance().removeCountry(losingCountry);
     }
 
     @Override
-    public void joinWar(GeopolObject joiner, WarFaction faction) {
+    public ValidationResult validateInvite(WarFaction inviter, GeopolObject receiver) {
 
-    }
+        // Conquests only allow inviting other countries
+        if (!(receiver instanceof Country)) {
+            return new ValidationResult(false, United.messenger().get("errors.invite.receiver-must-be-country"));
+        }
 
-    public ValidationResult validateJoinConditions(GeopolObject joiner, WarFaction faction) {
+        // Let other plugins check conditions
+        WarInviteEvent warInviteEvent = new WarInviteEvent(inviter.getWar(), inviter, receiver);
+        warInviteEvent.callEvent();
 
-        if (!(joiner instanceof Country))
-            return new ValidationResult(false, "Only countries can join this war");
-
-        // Let other plugins cancel the join based on their logic (e.g. missing
-        // alliances in UnitedPolitics)
-        var event = new WarPreJoinEvent(faction.getWar(), joiner, faction);
-        event.callEvent();
-        if (event.isCancelled())
-            return new ValidationResult(false, event.getCancelMessage());
+        if (warInviteEvent.isCancelled()) {
+            return new ValidationResult(false, warInviteEvent.getCancelMessage());
+        }
 
         return new ValidationResult(true, null);
     }
+
+    @Override
+    public void joinWar(GeopolObject joiner, WarFaction faction) {
+
+        faction.addCountry((Country) joiner);
+        WarManager.instance().getDatabaseManager().getWarFactionService().updateAsync(faction);
+
+        WarManager.instance().updatePlayerLists();
+    }
+
 
 }

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.bukkit.entity.Player;
 import org.unitedlands.unitedlands.classes.Coordinates;
-import org.unitedlands.unitedlands.classes.db.Identifiable;
+import org.unitedlands.classes.database.Identifiable;
 import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig;

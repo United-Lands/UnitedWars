@@ -96,6 +96,14 @@ public class WarGoalSkirmish extends WarGoal {
         return zones;
     }
 
+    
+    @Override
+    public ValidationResult validateInvite(WarFaction inviter, GeopolObject receiver) {
+        // Skirmishes have to be fought alone
+        return new ValidationResult(false, United.messenger().get("errors.invite.invite-not-supported"));
+    }
+
+    
     @Override
     public void joinWar(GeopolObject joiner, WarFaction faction) {
         // Skirmish wars don't allow anyone to join

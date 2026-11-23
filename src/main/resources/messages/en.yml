@@ -1,26 +1,56 @@
+prefix: "<bold><red>U</red><white>L</white> Wars<dark_gray>» </dark_gray></bold>"
 reload: "<dark_green>Plugin reloaded.</dark_green>"
 
 errors:
   generic: "<red>Could not execute the request. Check the console for details.</red>"
   invalid-war-goal: "<red>Invalid War Goal: {1}</red>"
-  object-not-found: "<red>Could not find object {1}.</red>"
+  object-not-found: "<red>Could not find {1}</red>"
+  player-not-found: "<red>Player {1} is offline or doesn't exist.</red>"
+  invalid-color: "<red>Invalid hex color</red>"
 
 admin:
   war:
     create:
       usage: "/wa create <war_goal> <attacker> <target> [title] [description]"
+  mercenary:
+    add:
+      limit-reached: "<red>Faction has already reached mercenary limit.</red>"
+      player-in-war: "<red>Player is already in a war.</red>"
+      no-military-rank: "<red>Player doesn't have a military rank.</red>"
+      success: "<aqua>Added player {1} as mercenary to faction {2}."
+    remove:
+      not-mercenary: "<red>Player is not a mercenary in that faction.</red>"
+      success: "<aqua>Removed player {1} as mercenary of faction {2}."
 
 player:
+  faction:
+    not-faction-leader: "<red>Only faction leaders can do this.</red>"
+    name-in-use: "<yellow>This name is already in use. Please choose a unique one.</yellow>"
+    setcolor-success: "<aqua>Faction color changed to {1}</aqua>"
+    setname-success: "<aqua>Faction name changed to {1}</aqua>"
   war:
     book:
       usage: "/war book <war_goal> [target]"
       unknown-war-goal: "<yellow>Unkown war goal: {1}.</yellow>"
       validation-error: "<yellow>Can't create war book: {1}</yellow>"
+      cost-too-high: "<warn>You don't have enough mobilisation for this. (You need {1} but have {2})<warn>"
       not-in-settlement: "<yellow>You are not part of a settlement.</yellow>"
       not-in-country: "<yellow>You are not part of a country.</yellow>"
       no-rank: "<yellow>You don't have the required settlement or country rank to to this.</yellow>"
       no-region: "<yellow>Your settlement is not in a region.</yellow>"
       target-invalid: "<yellow>Target {1} not valid for this war goal.</yellow>"
+  invite:
+    joined: "<broadcast>{1} just joined faction {2} in the war {3}!<broadcast>"
+  mercenary:
+    add:
+      limit-reached: "<yellow>Your faction has already reached its mercenary limit.</yellow>"
+      player-in-war: "<yellow>This player is already in a war.</yellow>"
+      no-military-rank: "<yellow>This player doesn't have a military rank.</yellow>"
+      success: "<aqua>Added player {1} as mercenary to {2}."
+    remove:
+      not-mercenary: "<red>This player is not a mercenary in your faction.</red>"
+      success: "<aqua>Excluded player {1} from fighting for faction {2}."
+
 
 # +---------------------------------------------+ #
 # |               War Goals                     | #
@@ -28,37 +58,33 @@ player:
 
 war-goals:
   claim-dispute:
-    display-name: "<b>Claim Dispute</b>"
-    description: "<gray>Two or more countries fighting over an unclaimed region.</gray>"
-    win: "<b>Win Conditions</b>:<br>All claimants: Conquer the region home chunk."
-    reward: "<b>Rewards</b>:<br>Winning claimant: Gains control of the region."
+    display-name: "<br>                            <b><gradient:#FFFFFF:#AAAAAA>CLAIM DISPUTE</gradient></b><br>"
+    description: "<gray>Two or more countries are fighting over the unclaimed region of <b>{1}</b>.</gray><br>"
     end-messages:
       DRAW: "The war ended without a clear winner. The region remains uncontrolled."
-      RIVAL: "The winning faction has seized control of the region."
+      CLAIMANT: "The winning faction has seized control of the region."
   conquest:
-    display-name: "Conquest"
+    display-name: "<br>                          <b><gradient:#FAC230:#FF9B00>REGION CONQUEST</gradient></b><br>"
     description: "<gray>The attackers have declared war to take <b>{1}</b>. Defenders may attempt a counterattack in the closest enemy region.</gray><br>"
     end-messages:
       DRAW: "The war ended without a clear winner. All war contributions have been returned."
-      ATTACKER: "The attackers are victorius and have taken the target region."
-      DEFENDER: "The defenders have repelled the attack. The region remains in their control."
+      ATTACKER: "The attackers were victorious and have taken the target region."
+      DEFENDER: "The defenders have repelled the attack. The region remains under their control."
   revolt:
     display-name: "Revolt"
-    description: "One or more settlements revolting against their country."
-    win: "Rebels: Conquer the region home chunk and hold your settlements. Loyalists: Conquer all revolting settlements."
-    reward: "Rebels: The region and all settlements will become uncontrolled."
+    description: "A revolt has broken out in <b>{1}</b>. Rebels are trying to gain their independence."
     end-messages:
       DRAW: "The war ended without a clear winner. The status quo has been restored."
       ATTACKER: "The rebels have won the day! Their region has gained independence."
-      DEFENDER: "The rebels were defeated. The region remains under country control."
+      DEFENDER: "The uprising was crushed. The region remains under the current owner's control."
   subjugation:
     display-name: "Subjugation"
     description: "A war to force a settlement into a country."
-    win: "Attacker: Conquer the settlement and defend against counterattacks. Defender: protect the settlement and conquer the enemy's closest region."
     end-messages:
       DRAW: "The war ended without a clear winner. All war contributions have been returned."
-      ATTACKER: "The attackers are victorius and have taken the settlement."
+      ATTACKER: "The attackers were victorious and have taken the settlement."
       DEFENDER: "The defenders have repelled the attack. The settlement remains free."
+
 
 # +---------------------------------------------+ #
 # |               War Messages                  | #
@@ -66,32 +92,41 @@ war-goals:
 
 info-screens:
   war-declared:
-    decription: "<gray>{1}</gray>"
-    war-goal: "<gray><white><bold>{1}</bold></white>: {2}</gray>"
+    custom-decription: "<gold><i>{1}</i></gold><br>"
     faction-header: "<white><bold>Factions in this war:</bold></white>"
-    faction-entry: "<gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3}</gray>"
+    faction-entry: "  <gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3}</gray>"
+    faction-entry-maxscore: "<gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3} / {4}</gray>"
     faction-win-conditions-header: "<white><bold>They <green>win</green> if one of the following is true:</bold></white>"
-    faction-win-conditions-entry: "<gray>- {1} {2}</gray>"
+    faction-win-conditions-entry: "    <gray>- {1} {2}</gray>"
     faction-lose-conditions-header: "<white><bold>They <red>lose</red> if one of the following is true:</bold></white>"
-    faction-lose-conditions-entry: "<gray>- {1} {2}</gray>"
+    faction-lose-conditions-entry: "    <gray>- {1} {2}</gray>"
     war-chest: "<gray><white><bold>Factions in this war:</bold></white></gray>"
-    timer-info: "<gray><white><bold>This war will start in:</bold></white> {1}</gray>"
+    timer-info: "<br><gray>This war will start in: <b>{1}</b></gray>"
+  war-start:
+    info: "<gray>The war has started and will last {1}. Point scoring is now active.</gray><br><br><gray>Use <gold>[<aqua>/ war info {2}</aqua>]</gold> for details.</gray>"
   war-info:
-    decription: "<gray>{1}</gray>"
-    war-goal: "<gray><white><bold>{1}</bold></white>: {2}</gray>"
-    faction-header: "<white><bold>Factions in this war:</bold></white>"
-    faction-entry: "<gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3}</gray>"
-    faction-win-conditions-header: "<white><bold>They <green>win</green> if one of the following is true:</bold></white>"
-    faction-win-conditions-entry: "<gray>- {1} {2}</gray>"
-    faction-lose-conditions-header: "<white><bold>They <red>lose</red> if one of the following is true:</bold></white>"
-    faction-lose-conditions-entry: "<gray>- {1} {2}</gray>"
-    war-chest: "<gray><white><bold>Factions in this war:</bold></white></gray>"
+    faction-entry: "<white><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3}</white>"
+    faction-entry-maxscore: "<white><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3} / {4}</white>"
+    faction-header: "<gold>                              [ <white><b>Factions</b></white> ]</gold><br><dark_gray>-------------------------------------------------</dark_gray>"
+    faction-divider: "<dark_gray>-------------------------------------------------</dark_gray>"
+    faction-win: "<gray><b>Victory on</b>: {1}</gray>"
+    faction-lose: "<gray><b>Defeat on</b>: {1}</gray>"
+    zones-header: "<br><gold>                              [ <white><b>War Zones</b></white> ]</gold>"
+    zones: "{1}<br>"
     timer-info: "<gray><white><bold>This war will end in:</bold></white> {1}</gray>"
   war-end:
-    info: "<gray>The war has ended with the following result:</gray>"
-    draw: "<white><bold>DRAW</bold></white>"
-    winner: "<white><bold>Winner: </bold></white> {1} ({2})"
-    win-condition: "<white><bold>Winning condition: </bold></white> {1}"
+    info: "<gray>The war has ended with the following result:</gray><br>"
+    draw: "<white><bold>DRAW</bold></white><br>"
+    winner: "<white><bold>Winner: </bold></white> <gray>{1} ({2})</gray>"
+    win-condition: "<white><bold>Winning condition: </bold></white> <gray>{1}</gray><br>"
+    win-by-highest-score: "<white><bold>Winning condition: </bold></white> <gray>Highest score</gray><br>"
+    reward: "<gray>{1}</gray>"
+  war-participants:
+    faction-header: "<body><bold>{1}</bold> ({2})</body>"
+    faction-countries: "<body><label>Countries:</label> {1}</body>"
+    faction-settlements: "<body><label>Settlements:</label> {1}</body>"
+    faction-players: "<body><label>Online Players:</label> {1}</body>"
+
 
 chunk-captured: "<gold>A chunk in the town of <yellow>{1} ({2}) <gold>has been captured!"
 town-captured: "<gold><bold>{1}<reset><white>: The town of {2} succumbed to the siege of the attacking armies and was captured!"

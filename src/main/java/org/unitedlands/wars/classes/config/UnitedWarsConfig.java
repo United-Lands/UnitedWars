@@ -8,7 +8,6 @@ import org.unitedlands.annotations.UnitedSetting;
 import org.unitedlands.registrars.config.UnitedConfigHandler;
 import org.unitedlands.registrars.config.UnitedConfigs;
 import org.unitedlands.registrars.config.UnitedDynamicSection;
-import org.unitedlands.unitedlands.classes.configs.GeneralConfig.GeopolAttributeDefaults;
 
 @UnitedConfig(file = "config.yml") 
 public interface UnitedWarsConfig extends UnitedConfigHandler  {
@@ -34,7 +33,7 @@ public interface UnitedWarsConfig extends UnitedConfigHandler  {
     long warSchedulerCheckInterval();
 
     @UnitedSection(key = "geopol-attribute-defaults")
-    UnitedDynamicSection<GeopolAttributeDefaults> geopolAttributeDefaults();
+    UnitedDynamicSection<org.unitedlands.unitedlands.classes.configs.UnitedLandsConfig.GeopolAttributeDefaults> geopolAttributeDefaults();
     
     @UnitedSetting(key = "world-blacklist")
     List<String> worldBlacklist();

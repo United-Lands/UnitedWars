@@ -2,7 +2,6 @@ package org.unitedlands.wars.classes.warzone;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.unitedlands.unitedlands.classes.Coordinates;
 import org.unitedlands.unitedlands.integrations.Pl3xMap.Pl3xMapRenderer;
 import org.unitedlands.unitedlands.utils.CoordinateUtils;
 import org.unitedlands.utils.United;

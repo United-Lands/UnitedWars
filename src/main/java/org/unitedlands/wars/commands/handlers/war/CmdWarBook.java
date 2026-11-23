@@ -128,30 +128,24 @@ public class CmdWarBook implements UnitedCommandExecutor {
         }
 
         var cost = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId()).cost();
-        var mobilisation = declarer.getAttribute("MOBILIZATION");
+        var mobilisation = declarer.getAttribute("MOBILIZATION", UnitedWarsConfig.get().geopolAttributeDefaults().get("MOBILIZATION"));
         if (mobilisation.getCurrentValue() < cost) {
-            United.messenger().send(sender, "player.war.book.cost-too-high", validationResult.message());
+            United.messenger().send(sender, "player.war.book.cost-too-high", String.valueOf(cost), String.valueOf(mobilisation.getCurrentValue()));
             return;
         }
 
-        mobilisation.setCurrentValue(mobilisation.getCurrentValue() - cost);
-        declarer.addAttribute(requiredRank, mobilisation);
-        declarer.save();
-
-        createDeclarationBook(player, declarer.getUuid(), target.getUuid(), warGoal);
-
-    }
-
-    private void createDeclarationBook(Player player, UUID declarer, UUID target, WarGoal warGoal) {
-
-        var mobilisationCost = UnitedWarsConfig.get().warGoalSettings().get(warGoal.getId()).cost();
-
         Confirmation confirmation = new Confirmation("warbook");
+        GeopolObject finalDeclarer = declarer;
+        GeopolObject finalTarget = target;
+
         confirmation.setRunnable(() -> {
 
-            ItemStack warBook = WarBookUtils.createWarBook(warGoal.getId(), declarer, target);
+            ItemStack warBook = WarBookUtils.createWarBook(warGoal.getId(), finalDeclarer.getUuid(), finalTarget.getUuid());
 
-            // deductCosts(playerTown, mobilisationCost);
+            mobilisation.setCurrentValue(mobilisation.getCurrentValue() - cost);
+            finalDeclarer.addAttribute("MOBILIZATION", mobilisation);
+            finalDeclarer.save();
+
 
             var overflow = player.getInventory().addItem(warBook);
             if (overflow != null && !overflow.isEmpty()) {
@@ -162,8 +156,10 @@ public class CmdWarBook implements UnitedCommandExecutor {
 
             United.messenger().send(player, "war-book-created");
 
-        }).setTitle("<gray>Creating this war declaration book will cost " + mobilisationCost + " mobilisation. Continue?").setSender(player).setReceiver(player)
+        }).setTitle("<gray>Creating this war declaration book will cost " + cost + " mobilisation. Continue?").setSender(player).setReceiver(player)
                 .send();
+
+
     }
 
 }

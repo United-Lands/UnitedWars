@@ -173,6 +173,13 @@ public class WarGoalSubjugation extends WarGoal {
         settlement.saveAndRender();
     }
 
+    
+    @Override
+    public ValidationResult validateInvite(WarFaction inviter, GeopolObject receiver) {
+        // Subjugations have to be fought alone
+        return new ValidationResult(false, United.messenger().get("errors.invite.invite-not-supported"));
+    }
+    
     @Override
     public void joinWar(GeopolObject joiner, WarFaction faction) {
 

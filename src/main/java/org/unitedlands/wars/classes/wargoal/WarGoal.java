@@ -32,6 +32,8 @@ public abstract class WarGoal {
 
     public abstract Set<WarZone> createWarZones(GeopolObject declarer, GeopolObject target, War war);
 
+    public abstract ValidationResult validateInvite(WarFaction inviter, GeopolObject receiver);
+
     public abstract void joinWar(GeopolObject joiner, WarFaction faction);
 
     public abstract void resolve(War war);

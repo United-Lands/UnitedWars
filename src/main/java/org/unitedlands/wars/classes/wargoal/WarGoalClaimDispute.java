@@ -122,6 +122,14 @@ public class WarGoalClaimDispute extends WarGoal {
         country.saveAndRender();
     }
 
+
+    
+    @Override
+    public ValidationResult validateInvite(WarFaction inviter, GeopolObject receiver) {
+        // Claims disputes have to be fought alone
+        return new ValidationResult(false, United.messenger().get("errors.invite.invite-not-supported"));
+    }
+
     @Override
     public void joinWar(GeopolObject joiner, WarFaction faction) {
         // TODO Auto-generated method stub

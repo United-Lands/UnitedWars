@@ -2,6 +2,8 @@ package org.unitedlands.wars.classes.wargoal;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.unitedlands.unitedlands.classes.Country;
 import org.unitedlands.unitedlands.classes.GeopolObject;
 import org.unitedlands.unitedlands.classes.Region;
 import org.unitedlands.unitedlands.classes.Settlement;
@@ -13,6 +15,7 @@ import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZone;
 import org.unitedlands.wars.events.WarGoalValidationEvent;
+import org.unitedlands.wars.events.WarInviteEvent;
 
 public class WarGoalRevolt extends WarGoal {
 
@@ -165,6 +168,48 @@ public class WarGoalRevolt extends WarGoal {
             }
 
         }
+    }
+
+    @Override
+    public ValidationResult validateInvite(WarFaction inviter, GeopolObject receiver) {
+        // Conquests only allow inviting other countries
+        if (!(receiver instanceof Country) && !(receiver instanceof Settlement)) {
+            return new ValidationResult(false, United.messenger().get("errors.invite.invalid-receiver"));
+        }
+
+
+        // Check special requirements for settlements (they must be in the same region as the revolting settlement)
+
+        if (inviter.getRole() == WarFactionRole.ATTACKER) {
+            // Check conditions for the revolting settlement
+            var revoltingSettlement = UnitedLandsDataManager.instance().getSettlement(inviter.getFactionLeaderId());
+            if (receiver instanceof Settlement targetSettlement) {
+                if (targetSettlement.equals(revoltingSettlement)) {
+                    return new ValidationResult(false, United.messenger().get("errors.invite.invalid-receiver"));
+                }
+                if (!revoltingSettlement.getRegion().equals(targetSettlement.getRegion())) {
+                    return new ValidationResult(false, United.messenger().get("errors.invite.receiver-must-be-in-same-region"));
+                }
+            } else if (receiver instanceof Country country) {
+                // Catch stupid cases where a revolting settlements invites the country they are revolting against
+                if (revoltingSettlement.getRegion().getCountry().equals(country)) {
+                    return new ValidationResult(false, United.messenger().get("errors.invite.invalid-receiver"));
+                }
+            }
+        } else {
+            // Countries can't get help for revolts.
+            return new ValidationResult(false, United.messenger().get("errors.invite.invite-not-supported"));
+        }
+
+        // Let other plugins check conditions
+        WarInviteEvent warInviteEvent = new WarInviteEvent(inviter.getWar(), inviter, receiver);
+        warInviteEvent.callEvent();
+
+        if (warInviteEvent.isCancelled()) {
+            return new ValidationResult(false, warInviteEvent.getCancelMessage());
+        }
+
+        return new ValidationResult(true, null);
     }
 
     @Override

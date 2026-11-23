@@ -25,11 +25,13 @@ warscheduler-check-interval: 15 # in seconds
 
 geopol-attribute-defaults:
   MOBILIZATION:
+    display: "Mobilisation"
     current-value: 20
     max-value: 100
     min-value: 0
     daily-change: 1
   MAX_MERCENARIES:
+    display: "Maximum mercenaries"
     current-value: 5
     max-value: 5
     min-value: 0

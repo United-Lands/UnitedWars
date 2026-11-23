@@ -10,17 +10,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.unitedlands.restoration.UnitedRestoration;
 import org.unitedlands.unitedlands.classes.Coordinates;
-import org.unitedlands.unitedlands.classes.db.Identifiable;
-import org.unitedlands.unitedlands.integrations.Pl3xMap.Pl3xMapRenderer;
+import org.unitedlands.classes.database.Identifiable;
 import org.unitedlands.libs.ormlite.field.DatabaseField;
 import org.unitedlands.libs.ormlite.table.DatabaseTable;
 import org.unitedlands.utils.United;
-import org.unitedlands.wars.UnitedWars;
-import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
 import org.unitedlands.wars.managers.SiegeManager;
