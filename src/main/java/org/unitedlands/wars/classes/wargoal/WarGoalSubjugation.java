@@ -31,19 +31,19 @@ public class WarGoalSubjugation extends WarGoal {
         if ((declarer instanceof Country country) && (target instanceof Settlement settlement)) {
             if (settlement.hasCountry()) {
                 if (country.equals(settlement.getCountry())) {
-                    return new ValidationResult(false, "The settlement is already part of the country.");
+                    return new ValidationResult(false, United.messenger().get("war-goals.subjugation.validation.already-in-country"));
                 } else {
-                    return new ValidationResult(false, "The settlement is already part of a different country.");
+                    return new ValidationResult(false, United.messenger().get("war-goals.subjugation.validation.in-other-country"));
                 }
             }
             if (settlement.getRegion() == null) {
-                return new ValidationResult(false, "The settlement is not in a region.");
+                return new ValidationResult(false, United.messenger().get("war-goals.subjugation.validation.no-region"));
             }
             if (!settlement.getRegion().hasCountry()) {
-                return new ValidationResult(false, "The settlement is in an unowned region.");
+                return new ValidationResult(false, United.messenger().get("war-goals.subjugation.validation.region-unowned"));
             }
             if (!country.equals(settlement.getRegion().getCountry())) {
-                return new ValidationResult(false, "The country doesn't own the target settlement's region.");
+                return new ValidationResult(false, United.messenger().get("war-goals.subjugation.validation.region-not-owned"));
             }
 
             // Trigger external validation (e.g. in UnitedPolitics)
@@ -54,7 +54,7 @@ public class WarGoalSubjugation extends WarGoal {
             }
 
         } else {
-            return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
+            return new ValidationResult(false, United.messenger().get("errors.invalid-war-goal-targets"));
         }
         return new ValidationResult(true, null);
     }
@@ -67,10 +67,7 @@ public class WarGoalSubjugation extends WarGoal {
         var country = (Country) declarer;
         var settlement = (Settlement) target;
 
-        WarFaction attackerFaction = new WarFaction(war, WarFactionRole.ATTACKER, country.getName(), -65536);
-        attackerFaction.setRole(WarFactionRole.ATTACKER);
-        attackerFaction.setFactionLeaderId(country.getUuid());
-        attackerFaction.addCountry(country);
+        WarFaction attackerFaction = createFaction(war, WarFactionRole.ATTACKER, country.getName(), PRIMARY_FACTION_COLOR, country);
 
         var attackerScoreCap = getScoreCap("attacker");
         attackerFaction.addWinCondition(WarConditionReachScore.ID, attackerScoreCap);
@@ -79,15 +76,12 @@ public class WarGoalSubjugation extends WarGoal {
 
         factions.add(attackerFaction);
 
-        WarFaction defenderFaction = new WarFaction(war, WarFactionRole.DEFENDER, settlement.getName(), -16776961);
-        defenderFaction.setFactionLeaderId(settlement.getUuid());
-        defenderFaction.addSettlement(settlement);
+        WarFaction defenderFaction = createFaction(war, WarFactionRole.DEFENDER, settlement.getName(), SECONDARY_FACTION_COLOR, settlement);
 
         var defenderScoreCap = getScoreCap("defender");
         defenderFaction.addWinCondition(WarConditionReachScore.ID, defenderScoreCap);
         defenderFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
         defenderFaction.addLoseCondition(WarConditionOwnNoWarZones.ID);
-        defenderFaction.setWar(war);
 
         factions.add(defenderFaction);
 

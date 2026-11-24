@@ -8,7 +8,6 @@ public class WarConditionOwnNoWarZones extends WarCondition {
 
     public WarConditionOwnNoWarZones() {
         this.id = ID;
-        this.description = "Own no war zones";
     }
 
     @Override

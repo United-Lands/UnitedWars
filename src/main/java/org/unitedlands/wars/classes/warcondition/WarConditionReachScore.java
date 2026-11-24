@@ -8,7 +8,6 @@ public class WarConditionReachScore extends WarCondition {
 
     public WarConditionReachScore() {
         this.id = ID;
-        this.description = "Reach score";
     }
 
     @Override

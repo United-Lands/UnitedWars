@@ -74,7 +74,7 @@ public class CmdWarFactionInvite implements UnitedCommandExecutor {
         var result = warGoal.validateInvite(faction, receiver);
 
         if (!result.valid()) {
-            United.messenger().sendRaw(sender, "<error>" + result.message() + "</error>");
+            United.messenger().send(sender, "player.invite.validation-error", result.message());
             return;
         }
 

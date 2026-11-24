@@ -10,7 +10,6 @@ public class WarConditionOwnMinimumWarZones extends WarCondition {
 
     public WarConditionOwnMinimumWarZones() {
         this.id = ID;
-        this.description = "Own minimum war zones";
     }
 
     @Override

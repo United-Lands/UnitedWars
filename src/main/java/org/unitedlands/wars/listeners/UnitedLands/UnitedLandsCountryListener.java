@@ -17,9 +17,7 @@ public class UnitedLandsCountryListener implements Listener {
 
     @EventHandler(ignoreCancelled = false)
     public void onDoubleClaim(RegionDoubleClaimEvent event) {
-        // TODO: Move string to config
-        event.setConfirmationMessage(
-                "<red>This region is already being claimed. If you approve this claim, you will trigger a war with the claiming country. Continue?</red>");
+        event.setConfirmationMessage(United.messenger().get("player.war.claim-dispute.confirm"));
         event.setCancelled(false);
     }
 

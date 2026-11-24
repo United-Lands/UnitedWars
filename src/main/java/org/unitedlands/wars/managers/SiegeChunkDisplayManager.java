@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.bukkit.entity.Player;
 import org.unitedlands.unitedlands.classes.Coordinates;
+import org.unitedlands.utils.United;
 import org.unitedlands.wars.classes.war.SiegeChunk;
 
 import net.kyori.adventure.bossbar.BossBar;
@@ -45,31 +46,26 @@ public class SiegeChunkDisplayManager {
         Color color = Color.GREEN;
 
         if (siegeChunk.isOccupied() || siegeChunk.getWarZone().isOccupied()) {
-            label += "<red>(Occupied)</red>";
+            label += United.messenger().get("siege-bar.occupied");
             color = Color.RED;
         } else if (!siegeChunk.getWarZone().isSiegeEnabled()) {
-            label += "<gray>(Siege disabled)</gray>";
+            label += United.messenger().get("siege-bar.siege-disabled");
             color = Color.WHITE;
         } else {
             var owner = siegeChunk.getOwner();
             if (owner != null) {
-                label += "Owner: " + owner.getColoredCleanName();
+                label += United.messenger().get("siege-bar.owner", owner.getColoredCleanName());
             } else {
-                label += "<gray>Unowned</gray>";
+                label += United.messenger().get("siege-bar.unowned");
             }
 
-            label += " (" + siegeChunk.getCurrentHealth() + "/" + siegeChunk.getMaxHealth() + ")";
+            label += United.messenger().get("siege-bar.health", String.valueOf(siegeChunk.getCurrentHealth()), String.valueOf(siegeChunk.getMaxHealth()));
 
-            if (progress <= 0.66f)
-                color = Color.YELLOW;
-            else if (progress <= 0.33f)
+            if (progress <= 0.33f)
                 color = Color.RED;
+            else if (progress <= 0.66f)
+                color = Color.YELLOW;
         }
-
-        if (progress <= 0.66f)
-            color = Color.YELLOW;
-        else if (progress <= 0.33f)
-            color = Color.RED;
 
         healthBar.name(MiniMessage.miniMessage().deserialize(label));
         healthBar.progress(progress);

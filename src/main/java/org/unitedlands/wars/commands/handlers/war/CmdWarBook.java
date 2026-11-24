@@ -163,7 +163,7 @@ public class CmdWarBook implements UnitedCommandExecutor {
 
             United.messenger().send(player, "war-book-created");
 
-        }).setTitle("<gray>Creating this war declaration book will cost " + cost + " mobilisation. Continue?").setSender(player).setReceiver(player)
+        }).setTitle(United.messenger().get("player.war.book.confirm-cost", String.valueOf(cost))).setSender(player).setReceiver(player)
                 .send();
 
 

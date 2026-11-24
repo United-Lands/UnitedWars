@@ -18,7 +18,7 @@ public class UnitedLandsMovementListener implements Listener {
         var coords = CoordinateUtils.locationToChunkCoordinates(event.getLocation());
 
         if (WarManager.instance().isChunkInWarZone(coords)) {
-            United.messenger().sendRaw(event.getPlayer(), "<red>Now entering a war zone!</red>");
+            United.messenger().send(event.getPlayer(), "player.war-zone.entering");
         }
     }
 

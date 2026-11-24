@@ -33,22 +33,22 @@ public class WarGoalRevolt extends WarGoal {
         if ((declarer instanceof Settlement settlement) && (target instanceof Region region)) {
 
             if (!settlement.hasCountry()) {
-                return new ValidationResult(false, "The settlement doesn't belong to a country.");
+                return new ValidationResult(false, United.messenger().get("war-goals.revolt.validation.settlement-no-country"));
             }
             if (!settlement.hasRegion()) {
-                return new ValidationResult(false, "The settlement doesn't belong to a region.");
+                return new ValidationResult(false, United.messenger().get("war-goals.revolt.validation.settlement-no-region"));
             }
             if (!settlement.getRegion().equals(region)) {
-                return new ValidationResult(false, "The target region is not the settlement's region.");
+                return new ValidationResult(false, United.messenger().get("war-goals.revolt.validation.wrong-region"));
             }
             if (!region.hasCountry()) {
-                return new ValidationResult(false, "The target region doesn't belong to a country.");
+                return new ValidationResult(false, United.messenger().get("war-goals.revolt.validation.region-unowned"));
             }
             if (!region.getCountry().equals(settlement.getCountry())) {
-                return new ValidationResult(false, "The target region doesn't belong to the settlement's country.");
+                return new ValidationResult(false, United.messenger().get("war-goals.revolt.validation.region-other-country"));
             }
             if (settlement.equals(settlement.getCountry().getCapital())) {
-                return new ValidationResult(false, "A country's capital can't revolt.");
+                return new ValidationResult(false, United.messenger().get("war-goals.revolt.validation.capital"));
             }
 
              // Trigger external validation (e.g. in UnitedPolitics)
@@ -59,7 +59,7 @@ public class WarGoalRevolt extends WarGoal {
             }
 
         } else {
-            return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
+            return new ValidationResult(false, United.messenger().get("errors.invalid-war-goal-targets"));
         }
         return new ValidationResult(true, null);
     }
@@ -72,9 +72,7 @@ public class WarGoalRevolt extends WarGoal {
 
         var declarerScoreCap = getScoreCap("attacker");
 
-        WarFaction declarerFaction = new WarFaction(war, WarFactionRole.ATTACKER, "Rebels", -65536);
-        declarerFaction.setFactionLeaderId(declaringSettlement.getUuid());
-        declarerFaction.addSettlement(declaringSettlement);
+        WarFaction declarerFaction = createFaction(war, WarFactionRole.ATTACKER, "Rebels", PRIMARY_FACTION_COLOR, declaringSettlement);
         declarerFaction.addWinCondition(WarConditionReachScore.ID, declarerScoreCap);
         declarerFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
         declarerFaction.addLoseCondition(WarConditionOwnNoWarZones.ID);
@@ -91,9 +89,7 @@ public class WarGoalRevolt extends WarGoal {
 
         var targetScoreCap = getScoreCap("defender");
 
-        WarFaction targetFaction = new WarFaction(war, WarFactionRole.DEFENDER, "Loyalist", -16776961); 
-        targetFaction.setFactionLeaderId(targetCountry.getUuid());
-        targetFaction.addCountry(targetCountry);
+        WarFaction targetFaction = createFaction(war, WarFactionRole.DEFENDER, "Loyalist", SECONDARY_FACTION_COLOR, targetCountry);
         targetFaction.addWinCondition(WarConditionReachScore.ID, targetScoreCap);
         targetFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
 
@@ -194,6 +190,17 @@ public class WarGoalRevolt extends WarGoal {
         }
 
         country.saveAndRender();
+    }
+
+    @Override
+    public String getEndMessageKey(War war) {
+        var winner = war.getWinningFaction();
+        if (winner != null && winner.getRole() == WarFactionRole.ATTACKER) {
+            var revoltingSettlement = UnitedLandsDataManager.instance().getSettlement(winner.getFactionLeaderId());
+            if (revoltingSettlement != null && revoltingSettlement.isCapital())
+                return "war-goals." + getId() + ".end-messages.TAKEOVER";
+        }
+        return super.getEndMessageKey(war);
     }
 
     @Override

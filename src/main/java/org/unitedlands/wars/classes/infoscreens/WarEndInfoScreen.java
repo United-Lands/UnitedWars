@@ -33,15 +33,12 @@ public class WarEndInfoScreen extends UnitedWarInfoScreen {
                 addComponent("win-condition", "info-screens.war-end.win-by-highest-score", UnitedWars.instance());
             }
 
-            var reward = United.messenger().get( "war-goals." + warGoalId + ".end-messages." + faction.getRole().toString(), UnitedWars.instance());
-            addComponent("reward", "info-screens.war-end.reward", UnitedWars.instance(), reward);
-
         } else {
             addComponent("draw", "info-screens.war-end.draw", UnitedWars.instance());
-
-            var reward = United.messenger().get( "war-goals." + warGoalId + ".end-messages.DRAW", UnitedWars.instance());
-            addComponent("reward", "info-screens.war-end.reward", UnitedWars.instance(), reward);
         }
+
+        var reward = United.messenger().get(warGoal.getEndMessageKey(war), UnitedWars.instance());
+        addComponent("reward", "info-screens.war-end.reward", UnitedWars.instance(), reward);
 
     }
 

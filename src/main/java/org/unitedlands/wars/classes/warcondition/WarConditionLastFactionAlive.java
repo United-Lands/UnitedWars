@@ -10,7 +10,6 @@ public class WarConditionLastFactionAlive extends WarCondition {
 
     public WarConditionLastFactionAlive() {
         this.id = ID;
-        this.description = "Be the last faction alive";
     }
 
     @Override

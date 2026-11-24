@@ -4,23 +4,27 @@ reload: "<dark_green>Plugin reloaded.</dark_green>"
 errors:
   generic: "<red>Could not execute the request. Check the console for details.</red>"
   invalid-war-goal: "<red>Invalid War Goal: {1}</red>"
+  invalid-war-goal-targets: "The provided targets are not suitable for this war goal."
   object-not-found: "<red>Could not find {1}</red>"
   player-not-found: "<red>Player {1} is offline or doesn't exist.</red>"
   invalid-color: "<red>Invalid hex color</red>"
+  no-citizen-data: "<red>Could not load your citizen data. Please contact an administrator.</red>"
+  invite:
+    invalid-receiver: "This receiver can't be invited to this war."
+    invite-not-supported: "This type of war doesn't allow inviting others."
+    receiver-must-be-country: "Only countries can be invited to this war."
+    receiver-must-be-in-same-region: "Only settlements in the same region can be invited to this revolt."
 
 admin:
-  war:
-    create:
-      usage: "/wa create <war_goal> <attacker> <target> [title] [description]"
   mercenary:
     add:
       limit-reached: "<red>Faction has already reached mercenary limit.</red>"
       player-in-war: "<red>Player is already in a war.</red>"
       no-military-rank: "<red>Player doesn't have a military rank.</red>"
-      success: "<aqua>Added player {1} as mercenary to faction {2}."
+      success: "<aqua>Added player {1} as mercenary to faction {2}.</aqua>"
     remove:
       not-mercenary: "<red>Player is not a mercenary in that faction.</red>"
-      success: "<aqua>Removed player {1} as mercenary of faction {2}."
+      success: "<aqua>Removed player {1} as mercenary of faction {2}.</aqua>"
 
 player:
   faction:
@@ -30,28 +34,39 @@ player:
     setname-success: "<aqua>Faction name changed to {1}</aqua>"
   war:
     book:
-      usage: "/war book <war_goal> [target]"
-      unknown-war-goal: "<yellow>Unkown war goal: {1}.</yellow>"
+      unknown-war-goal: "<yellow>Unknown war goal: {1}.</yellow>"
       validation-error: "<yellow>Can't create war book: {1}</yellow>"
-      cost-too-high: "<warn>You don't have enough mobilisation for this. (You need {1} but have {2})<warn>"
+      cost-too-high: "<warn>You don't have enough mobilisation for this. (You need {1} but have {2})</warn>"
+      confirm-cost: "<gray>Creating this war declaration book will cost {1} mobilisation. Continue?</gray>"
       not-in-settlement: "<yellow>You are not part of a settlement.</yellow>"
       not-in-country: "<yellow>You are not part of a country.</yellow>"
-      no-rank: "<yellow>You don't have the required settlement or country rank to to this.</yellow>"
+      no-rank: "<yellow>You don't have the required settlement or country rank to do this.</yellow>"
       no-region: "<yellow>Your settlement is not in a region.</yellow>"
       target-invalid: "<yellow>Target {1} not valid for this war goal.</yellow>"
     claim-dispute:
+      confirm: "<red>This region is already being claimed. If you approve this claim, you will trigger a war with the claiming country. Continue?</red>"
       validation-error: "<yellow>Can't start a claim dispute: {1}</yellow>"
+    war-lives:
+      lost: "<yellow>You lost a war life in {2}. Lives remaining: {1}</yellow>"
+      final: "<red>You lost your last war life in {1}. You can no longer earn kill points or take part in sieges in this war.</red>"
+  war-zone:
+    entering: "<red>Now entering a war zone!</red>"
+  warcamp:
+    already-set: "<yellow>Your faction already has a war camp.</yellow>"
+    not-wilderness: "<yellow>War camps can only be set up in the wilderness.</yellow>"
+    war-active: "<yellow>War camps can't be set up while the war is active.</yellow>"
   invite:
-    joined: "<broadcast>{1} just joined faction {2} in the war {3}!<broadcast>"
+    joined: "<broadcast>{1} just joined faction {2} in the war {3}!</broadcast>"
+    validation-error: "<error>{1}</error>"
   mercenary:
     add:
       limit-reached: "<yellow>Your faction has already reached its mercenary limit.</yellow>"
       player-in-war: "<yellow>This player is already in a war.</yellow>"
       no-military-rank: "<yellow>This player doesn't have a military rank.</yellow>"
-      success: "<aqua>Added player {1} as mercenary to {2}."
+      success: "<aqua>Added player {1} as mercenary to {2}.</aqua>"
     remove:
       not-mercenary: "<red>This player is not a mercenary in your faction.</red>"
-      success: "<aqua>Excluded player {1} from fighting for faction {2}."
+      success: "<aqua>Excluded player {1} from fighting for faction {2}.</aqua>"
 
 
 # +---------------------------------------------+ #
@@ -59,33 +74,74 @@ player:
 # +---------------------------------------------+ #
 
 war-goals:
+  skirmish:
+    display-name: "<br>                              <b><gradient:#FF5555:#AA0000>SKIRMISH</gradient></b><br>"
+    description: "<gray>The attackers have declared a skirmish against <b>{1}</b>.</gray><br>"
+    end-messages:
+      DRAW: "The skirmish ended without a clear winner."
+      ATTACKER: "The attackers have won the skirmish."
+      DEFENDER: "The defenders have won the skirmish."
+    validation:
+      same-target: "Attacker and target are the same."
   claim-dispute:
     display-name: "<br>                            <b><gradient:#FFFFFF:#AAAAAA>CLAIM DISPUTE</gradient></b><br>"
     description: "<gray>Two or more countries are fighting over the unclaimed region of <b>{1}</b>.</gray><br>"
     end-messages:
       DRAW: "The war ended without a clear winner. The region remains uncontrolled."
       CLAIMANT: "The winning faction has seized control of the region."
+    validation:
+      not-claimed: "The region is not being claimed."
+      already-claimant: "Your country is already claiming this region."
   conquest:
     display-name: "<br>                          <b><gradient:#FAC230:#FF9B00>REGION CONQUEST</gradient></b><br>"
     description: "<gray>The attackers have declared war to take <b>{1}</b>. Defenders may attempt a counterattack in the closest enemy region.</gray><br>"
     end-messages:
-      DRAW: "The war ended without a clear winner. All war contributions have been returned."
+      DRAW: "The war ended without a clear winner. Nothing changes hands."
       ATTACKER: "The attackers were victorious and have taken the target region."
       DEFENDER: "The defenders have repelled the attack. The region remains under their control."
+    validation:
+      region-unowned: "The target region is unowned."
+      region-owned-by-declarer: "The target region already belongs to your country."
   revolt:
-    display-name: "Revolt"
-    description: "A revolt has broken out in <b>{1}</b>. Rebels are trying to gain their independence."
+    display-name: "<br>                               <b><gradient:#55FF55:#00AA00>REVOLT</gradient></b><br>"
+    description: "<gray>A revolt has broken out in <b>{1}</b>. The rebels are fighting for their independence, or to seize the country if its capital lies in the region.</gray><br>"
     end-messages:
-      DRAW: "The war ended without a clear winner. The status quo has been restored."
+      DRAW: "The war ended without a clear winner. The rebels remain part of the country."
       ATTACKER: "The rebels have won the day! Their region has gained independence."
+      TAKEOVER: "The rebels have seized power! Their settlement is the new capital and their mayor now leads the country."
       DEFENDER: "The uprising was crushed. The region remains under the current owner's control."
+    validation:
+      settlement-no-country: "Your settlement doesn't belong to a country."
+      settlement-no-region: "Your settlement doesn't belong to a region."
+      wrong-region: "The target region is not your settlement's region."
+      region-unowned: "The target region doesn't belong to a country."
+      region-other-country: "The target region doesn't belong to your settlement's country."
+      capital: "A country's capital can't revolt."
   subjugation:
-    display-name: "Subjugation"
-    description: "A war to force a settlement into a country."
+    display-name: "<br>                             <b><gradient:#55FFFF:#0000AA>SUBJUGATION</gradient></b><br>"
+    description: "<gray>The attackers are trying to force <b>{1}</b> to join their country.</gray><br>"
     end-messages:
-      DRAW: "The war ended without a clear winner. All war contributions have been returned."
+      DRAW: "The war ended without a clear winner. Nothing changes hands."
       ATTACKER: "The attackers were victorious and have taken the settlement."
       DEFENDER: "The defenders have repelled the attack. The settlement remains free."
+    validation:
+      already-in-country: "The settlement is already part of your country."
+      in-other-country: "The settlement is already part of a different country."
+      no-region: "The settlement is not in a region."
+      region-unowned: "The settlement is in an unowned region."
+      region-not-owned: "Your country doesn't own the target settlement's region."
+
+
+# +---------------------------------------------+ #
+# |               War Conditions                | #
+# +---------------------------------------------+ #
+
+war-conditions:
+  reach_score: "Reach score"
+  own_all_war_zones: "Own all war zones"
+  own_no_war_zones: "Own no war zones"
+  own_minimum_war_zones: "Own minimum war zones"
+  last_faction_alive: "Be the last faction standing"
 
 
 # +---------------------------------------------+ #
@@ -98,11 +154,6 @@ info-screens:
     faction-header: "<white><bold>Factions in this war:</bold></white>"
     faction-entry: "  <gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3}</gray>"
     faction-entry-maxscore: "<gray><bold>{1}</bold> ({2}) <dark_gray>|</dark_gray> 🗡 {3} / {4}</gray>"
-    faction-win-conditions-header: "<white><bold>They <green>win</green> if one of the following is true:</bold></white>"
-    faction-win-conditions-entry: "    <gray>- {1} {2}</gray>"
-    faction-lose-conditions-header: "<white><bold>They <red>lose</red> if one of the following is true:</bold></white>"
-    faction-lose-conditions-entry: "    <gray>- {1} {2}</gray>"
-    war-chest: "<gray><white><bold>Factions in this war:</bold></white></gray>"
     timer-info: "<br><gray>This war will start in: <b>{1}</b></gray>"
   war-start:
     info: "<gray>The war has started and will last {1}. Point scoring is now active.</gray><br><br><gray>Use <gold>[<aqua>/ war info {2}</aqua>]</gold> for details.</gray>"
@@ -129,21 +180,12 @@ info-screens:
     faction-settlements: "<body><label>Settlements:</label> {1}</body>"
     faction-players: "<body><label>Online Players:</label> {1}</body>"
 
-
-chunk-captured: "<gold>A chunk in the town of <yellow>{1} ({2}) <gold>has been captured!"
-town-captured: "<gold><bold>{1}<reset><white>: The town of {2} succumbed to the siege of the attacking armies and was captured!"
-resident-nation-joined-war: "<aqua>Your nation has joined the war!"
-war-call-send-success: "<aqua>Call to War sent to ally. The call will automatically expire in 5 minutes."
-war-call-receive: "<aqua>You received a Call to War. Use /t war acceptcall <war_name> to accept. The call will automatically expire in 5 minutes."
-war-declare-usage: "Usage: /t war declare"
-add-mercenary-success: "<aqua>{1} has been added as a mercenary for your side."
-resident-mercenary-join-success: "<aqua>You've been added as a mercenary on the {1} side of {2}"
-mercenary-remove-success: "<aqua>{1} has been removed as a mercenary for your side."
-mercenary-resident-removed-success: "<yellow>You've been removed as a mercenary on the {1} side of {2}"
-mercenary-invite-sent: "<aqua>Invitation sent to {1}. It will automatically expire in 5 minutes."
-mercenary-invite-received: '<aqua>You''ve received an invitation to join as a mercenary for the {1} side of {2}. Use "/t war acceptinvite <warname>" to accept.'
-war-call-ally-send-success: "<aqua>Call to War sent to ally. The call will automatically expire in 5 minutes."
-warning-warzone: "<yellow>WARNING: You have teleported to an active war zone. <red>You may lose your inventory when getting killed in this area."
+siege-bar:
+  occupied: "<red>(Occupied)</red>"
+  siege-disabled: "<gray>(Siege disabled)</gray>"
+  owner: "Owner: {1}"
+  unowned: "<gray>Unowned</gray>"
+  health: " ({1}/{2})"
 
 
 # +---------------------------------------------+ #

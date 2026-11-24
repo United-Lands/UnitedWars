@@ -36,10 +36,10 @@ public class WarGoalConquest extends WarGoal {
         if ((declarer instanceof Country country) && (target instanceof Region region)) {
 
             if (!region.hasCountry()) {
-                return new ValidationResult(false, "The target region is unowned.");
+                return new ValidationResult(false, United.messenger().get("war-goals.conquest.validation.region-unowned"));
             }
             if (region.getCountry().equals(country)) {
-                return new ValidationResult(false, "The target region already belongs to the country.");
+                return new ValidationResult(false, United.messenger().get("war-goals.conquest.validation.region-owned-by-declarer"));
             }
 
             // Trigger external validation (e.g. in UnitedPolitics)
@@ -51,7 +51,7 @@ public class WarGoalConquest extends WarGoal {
             }
 
         } else {
-            return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
+            return new ValidationResult(false, United.messenger().get("errors.invalid-war-goal-targets"));
         }
         return new ValidationResult(true, null);
     }
@@ -68,10 +68,7 @@ public class WarGoalConquest extends WarGoal {
             return null;
         }
 
-        WarFaction attackerFaction = new WarFaction(war, WarFactionRole.ATTACKER, country.getName(), -65536);
-        attackerFaction.setRole(WarFactionRole.ATTACKER);
-        attackerFaction.setFactionLeaderId(country.getUuid());
-        attackerFaction.addCountry(country);
+        WarFaction attackerFaction = createFaction(war, WarFactionRole.ATTACKER, country.getName(), PRIMARY_FACTION_COLOR, country);
 
         var attackerScoreCap = getScoreCap("attacker");
         attackerFaction.addWinCondition(WarConditionReachScore.ID, attackerScoreCap);
@@ -82,15 +79,12 @@ public class WarGoalConquest extends WarGoal {
 
         var targetCountry = region.getCountry();
 
-        WarFaction defenderFaction = new WarFaction(war, WarFactionRole.DEFENDER, targetCountry.getName(), -16776961);
-        defenderFaction.setFactionLeaderId(targetCountry.getUuid());
-        defenderFaction.addCountry(targetCountry);
+        WarFaction defenderFaction = createFaction(war, WarFactionRole.DEFENDER, targetCountry.getName(), SECONDARY_FACTION_COLOR, targetCountry);
 
         var defenderScoreCap = getScoreCap("defender");
         defenderFaction.addWinCondition(WarConditionReachScore.ID, defenderScoreCap);
         defenderFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
         defenderFaction.addLoseCondition(WarConditionOwnNoWarZones.ID);
-        defenderFaction.setWar(war);
 
         factions.add(defenderFaction);
 

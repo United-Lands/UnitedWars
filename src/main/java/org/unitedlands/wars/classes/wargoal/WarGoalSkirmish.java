@@ -30,7 +30,7 @@ public class WarGoalSkirmish extends WarGoal {
             // TODO: immunity
 
             if (settlement.equals(targetSettlement)) {
-                return new ValidationResult(false, "Attacker and target are the same.");
+                return new ValidationResult(false, United.messenger().get("war-goals.skirmish.validation.same-target"));
             }
 
              // Trigger external validation (e.g. in UnitedPolitics)
@@ -41,7 +41,7 @@ public class WarGoalSkirmish extends WarGoal {
             }
 
         } else {
-            return new ValidationResult(false, "The provided GeopolObject types are not suitable for this war goal.");
+            return new ValidationResult(false, United.messenger().get("errors.invalid-war-goal-targets"));
         }
         return new ValidationResult(true, null);
     }
@@ -56,9 +56,7 @@ public class WarGoalSkirmish extends WarGoal {
 
          var declarerScoreCap = getScoreCap("attacker");
 
-        WarFaction declarerFaction = new WarFaction(war, WarFactionRole.ATTACKER, declaringSettlement.getName(), -65536);
-        declarerFaction.setFactionLeaderId(declaringSettlement.getUuid());
-        declarerFaction.addSettlement(declaringSettlement);
+        WarFaction declarerFaction = createFaction(war, WarFactionRole.ATTACKER, declaringSettlement.getName(), PRIMARY_FACTION_COLOR, declaringSettlement);
 
         declarerFaction.addWinCondition(WarConditionReachScore.ID, declarerScoreCap);
         declarerFaction.addWinCondition(WarConditionOwnAllWarZones.ID);
@@ -68,9 +66,7 @@ public class WarGoalSkirmish extends WarGoal {
 
         var targetScoreCap = getScoreCap("defender");
 
-        WarFaction targetFaction = new WarFaction(war, WarFactionRole.DEFENDER, targeSettlement.getName(), -16776961);
-        targetFaction.setFactionLeaderId(targeSettlement.getUuid());
-        targetFaction.addSettlement(targeSettlement);
+        WarFaction targetFaction = createFaction(war, WarFactionRole.DEFENDER, targeSettlement.getName(), SECONDARY_FACTION_COLOR, targeSettlement);
 
         targetFaction.addWinCondition(WarConditionReachScore.ID, targetScoreCap);
         targetFaction.addWinCondition(WarConditionOwnAllWarZones.ID);

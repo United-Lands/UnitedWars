@@ -183,10 +183,10 @@ public class PlayerDeathListener implements Listener {
 
             if (warLivesUpdateEvent.getNewLives() == 0) {
                 // This death eliminated them.
-                United.messenger().send(victim, "messages.warlives-final", sharedWar.getCleanTitle());
+                United.messenger().send(victim, "player.war.war-lives.final", sharedWar.getCleanTitle());
             } else {
                 // Lives still remaining.
-                United.messenger().send(victim, "messages.warlives-lost", String.valueOf(warLivesUpdateEvent.getNewLives()), sharedWar.getCleanTitle());
+                United.messenger().send(victim, "player.war.war-lives.lost",String.valueOf(warLivesUpdateEvent.getNewLives()), sharedWar.getCleanTitle());
             }
         }
 

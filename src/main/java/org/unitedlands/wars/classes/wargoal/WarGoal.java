@@ -1,7 +1,6 @@
 package org.unitedlands.wars.classes.wargoal;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,6 +14,7 @@ import org.unitedlands.wars.classes.config.UnitedWarsConfig;
 import org.unitedlands.wars.classes.config.UnitedWarsConfig.WarGoalSetting;
 import org.unitedlands.wars.classes.war.War;
 import org.unitedlands.wars.classes.war.WarFaction;
+import org.unitedlands.wars.classes.war.WarFactionRole;
 import org.unitedlands.wars.classes.warzone.WarZoneRegion;
 import org.unitedlands.wars.classes.warzone.WarZoneSettlement;
 import org.unitedlands.wars.classes.warzone.WarZoneWarcamp;
@@ -22,8 +22,10 @@ import org.unitedlands.wars.classes.warzone.WarZone;
 
 public abstract class WarGoal {
 
+    protected static final int PRIMARY_FACTION_COLOR = 0xFFFF0000;
+    protected static final int SECONDARY_FACTION_COLOR = 0xFF0000FF;
+
     private final String id;
-    protected String description;
 
     public static record ValidationResult(boolean valid, String message) {
     }
@@ -45,6 +47,20 @@ public abstract class WarGoal {
     public abstract void resolve(War war);
 
     public void onWarRegistered(War war) {
+    }
+
+    protected WarFaction createFaction(War war, WarFactionRole role, String name, int color, Country leader) {
+        var faction = new WarFaction(war, role, name, color);
+        faction.setFactionLeaderId(leader.getUuid());
+        faction.addCountry(leader);
+        return faction;
+    }
+
+    protected WarFaction createFaction(War war, WarFactionRole role, String name, int color, Settlement leader) {
+        var faction = new WarFaction(war, role, name, color);
+        faction.setFactionLeaderId(leader.getUuid());
+        faction.addSettlement(leader);
+        return faction;
     }
 
     public WarGoalSetting getSettings() {
@@ -183,11 +199,10 @@ public abstract class WarGoal {
         return id;
     }
 
-    public String getDescription() {
-        return description;
+    public String getEndMessageKey(War war) {
+        var winner = war.getWinningFaction();
+        var outcome = winner == null ? "DRAW" : winner.getRole().toString();
+        return "war-goals." + id + ".end-messages." + outcome;
     }
 
-    public Map<String, String> getMessageReplacements() {
-        return Map.of("war-goal-id", getId().toUpperCase(), "war-goal-description", getDescription());
-    }
 }
