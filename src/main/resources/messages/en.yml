@@ -25,8 +25,27 @@ admin:
     remove:
       not-mercenary: "<red>Player is not a mercenary in that faction.</red>"
       success: "<aqua>Removed player {1} as mercenary of faction {2}.</aqua>"
+  military-rank:
+    unknown-rank: "<red>Unknown military rank: {1}</red>"
+    already-owned: "<red>{1} already has the military rank {2}.</red>"
+    unique-taken: "<red>The military rank {1} is unique and already held by {2} in this country.</red>"
+    add-success: "<aqua>Assigned military rank {1} to {2}.</aqua>"
+    no-rank: "<red>{1} doesn't have a military rank.</red>"
+    remove-success: "<aqua>Removed military rank {1} from {2}.</aqua>"
 
 player:
+  military-rank:
+    not-in-country: "<yellow>You are not part of a country.</yellow>"
+    no-permission: "<yellow>You don't have permission to manage military ranks in your country.</yellow>"
+    target-not-in-country: "<yellow>{1} is not a citizen of your country.</yellow>"
+    unknown-rank: "<yellow>Unknown military rank: {1}</yellow>"
+    already-owned: "<yellow>{1} already has the military rank {2}.</yellow>"
+    unique-taken: "<yellow>The military rank {1} can only be held by one citizen and is already held by {2}.</yellow>"
+    add-success: "<aqua>Assigned military rank {1} to {2}.</aqua>"
+    received: "<aqua>You have been assigned the military rank {1}.</aqua>"
+    no-rank: "<yellow>{1} doesn't have a military rank.</yellow>"
+    remove-success: "<aqua>Removed military rank {1} from {2}.</aqua>"
+    lost: "<yellow>You have lost your military rank {1}.</yellow>"
   faction:
     not-faction-leader: "<red>Only faction leaders can do this.</red>"
     name-in-use: "<yellow>This name is already in use. Please choose a unique one.</yellow>"

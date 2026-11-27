@@ -109,25 +109,23 @@ war-goal-settings:
       defender: 
         value: 15000
 
+# Military ranks are stored per citizen and assigned via "/war militaryrank" or "/uwa militaryrank".
+# Each citizen can hold one rank. Unique ranks can only be held by one citizen per country.
+# A citizen's rank is bound to the country they were in when it was assigned and is dropped if they change country.
 military-ranks:
-  default: # civilian rank, players with no assigned military towny rank
+  default: # civilian rank, players with no assigned military rank. Can't be assigned.
     score-multiplier: 0.0
-    level: town
     unique: false
   militia:
     score-multiplier: 0.9
-    level: town
     unique: false
   soldier:
     score-multiplier: 1.0
-    level: town
     unique: false
   officer:
     score-multiplier: 1.1
-    level: town
     unique: false
   general:
-    level: nation
     score-multiplier: 1.2
     unique: true
 

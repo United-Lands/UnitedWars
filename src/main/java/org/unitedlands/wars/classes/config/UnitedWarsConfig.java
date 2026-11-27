@@ -54,9 +54,8 @@ public interface UnitedWarsConfig extends UnitedConfigHandler  {
     UnitedDynamicSection<MilitaryRankSetting> militaryRanks();
 
     record MilitaryRankSetting(
-        @UnitedSetting(key = "score-multiplier", def = "1.0")           double  scoreMultiplier,
-        @UnitedSetting(key = "level",            def = "settlement")    String  level,
-        @UnitedSetting(key = "unique",           def = "false")         boolean unique
+        @UnitedSetting(key = "score-multiplier", def = "1.0")   double  scoreMultiplier,
+        @UnitedSetting(key = "unique",           def = "false") boolean unique
     ) { }
 
     @UnitedSection (key = "siege-settings")

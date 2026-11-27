@@ -43,6 +43,8 @@ public class WarManager {
 
     private static WarManager instance;
 
+    public static final String DEFAULT_MILITARY_RANK = "default";
+
     public static WarManager instance() {
         return instance;
     }
@@ -336,6 +338,7 @@ public class WarManager {
     public void validateMetaData(Player player) {
         WarMetaDataManager.instance().validateWarLivesMetaData(player);
         WarMetaDataManager.instance().validateFactionPermissions(player);
+        WarMetaDataManager.instance().validateMilitaryRankMetaData(player);
     }
 
     public void updatePlayerLists() {
@@ -358,37 +361,38 @@ public class WarManager {
         if (citizen.isMayor() || citizen.isLeader())
             return true;
 
-        var ranks = UnitedWarsConfig.get().militaryRanks().keys();
-
-        var citizenRanks = (new ArrayList<>(citizen.getSettlementRanks()));
-        citizenRanks.addAll(citizen.getCountryRanks());
-
-        var intersection = new ArrayList<String>(citizenRanks);
-        intersection.retainAll(ranks);
-        return intersection.size() > 0;
+        return !getCitizenMilitaryRank(citizen).equals(DEFAULT_MILITARY_RANK);
     }
 
-    public String getCitizenMilitaryRank(Citizen resident) {
-        var ranks = getMilitaryRanks();
-        var settlementRanks = resident.getSettlementRanks();
-        var countryRanks = resident.getCountryRanks();
-        for (var level : ranks.keySet()) {
-            for (var rank : ranks.get(level)) {
-                if (settlementRanks.contains(rank) || countryRanks.contains(rank))
-                    return rank;
-            }
-        }
-        return "default";
+    public String getCitizenMilitaryRank(Citizen citizen) {
+        var rank = WarMetaDataManager.instance().getMilitaryRank(citizen);
+        if (rank == null || !UnitedWarsConfig.get().militaryRanks().has(rank))
+            return DEFAULT_MILITARY_RANK;
+        return rank;
     }
 
-    public Map<String, List<String>> getMilitaryRanks() {
-        Map<String, List<String>> result = new HashMap<>();
-        var militaryRanks = UnitedWarsConfig.get().militaryRanks().keys();
-        for (var configRank : militaryRanks) {
-            var level = UnitedWarsConfig.get().militaryRanks().get(configRank).level();
-            result.computeIfAbsent(level, v -> new ArrayList<String>()).add(configRank);
+    public List<String> getAssignableMilitaryRanks() {
+        return UnitedWarsConfig.get().militaryRanks().keys().stream()
+                .filter(rank -> !rank.equals(DEFAULT_MILITARY_RANK))
+                .collect(Collectors.toList());
+    }
+
+    public boolean isAssignableMilitaryRank(String rank) {
+        return !rank.equals(DEFAULT_MILITARY_RANK) && UnitedWarsConfig.get().militaryRanks().has(rank);
+    }
+
+    public Citizen getUniqueMilitaryRankHolder(Citizen target, String rank) {
+        var rankSettings = UnitedWarsConfig.get().militaryRanks().get(rank);
+        if (rankSettings == null || !rankSettings.unique())
+            return null;
+        var country = target.getCountry();
+        if (country == null)
+            return null;
+        for (var citizen : country.getCitizens()) {
+            if (!citizen.equals(target) && getCitizenMilitaryRank(citizen).equals(rank))
+                return citizen;
         }
-        return result;
+        return null;
     }
 
     public List<String> getWarGoalIds() {

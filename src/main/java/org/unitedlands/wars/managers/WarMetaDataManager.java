@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.unitedlands.unitedlands.classes.Citizen;
 import org.unitedlands.unitedlands.classes.metadata.IntegerMetaDataField;
+import org.unitedlands.unitedlands.classes.metadata.StringMetaDataField;
 import org.unitedlands.unitedlands.managers.UnitedLandsDataManager;
 import org.unitedlands.utils.United;
 import org.unitedlands.wars.UnitedWars;
@@ -20,6 +21,8 @@ public class WarMetaDataManager {
     private static WarMetaDataManager instance;
 
     private final String WAR_LIVES_KEY = "unitedwar_war_lives_";
+    private final String MILITARY_RANK_KEY = "unitedwars_military_rank";
+    private final String MILITARY_RANK_COUNTRY_KEY = "unitedwars_military_rank_country";
 
     public static WarMetaDataManager instance() {
         return instance;
@@ -132,6 +135,54 @@ public class WarMetaDataManager {
 
     private String getWarLivesMetaKey(UUID warId) {
         return WAR_LIVES_KEY + warId;
+    }
+
+    public String getMilitaryRank(Citizen citizen) {
+        var rankMeta = citizen.getMetadata(MILITARY_RANK_KEY);
+        if (rankMeta == null || rankMeta.getValue() == null)
+            return null;
+        if (!getMilitaryRankCountryId(citizen).equals(getCountryId(citizen)))
+            return null;
+        return rankMeta.getValue().toString();
+    }
+
+    public void setMilitaryRank(Citizen citizen, String rank) {
+        citizen.addMetadata(new StringMetaDataField(MILITARY_RANK_KEY, rank, "Military Rank", true));
+        citizen.addMetadata(new StringMetaDataField(MILITARY_RANK_COUNTRY_KEY, getCountryId(citizen), "Military Rank Country", false));
+        citizen.save();
+    }
+
+    public void removeMilitaryRank(Citizen citizen) {
+        if (!citizen.hasMetadata(MILITARY_RANK_KEY) && !citizen.hasMetadata(MILITARY_RANK_COUNTRY_KEY))
+            return;
+        citizen.removeMetadata(MILITARY_RANK_KEY);
+        citizen.removeMetadata(MILITARY_RANK_COUNTRY_KEY);
+        citizen.save();
+    }
+
+    public void validateMilitaryRankMetaData(Player player) {
+        var citizen = UnitedLandsDataManager.instance().getCitizen(player);
+        if (citizen == null) {
+            United.logger().error("Couldn't find citizen data for " + player.getName(), "UnitedWars");
+            return;
+        }
+        if (!citizen.hasMetadata(MILITARY_RANK_KEY))
+            return;
+        var rank = getMilitaryRank(citizen);
+        if (rank == null || !WarManager.instance().isAssignableMilitaryRank(rank))
+            removeMilitaryRank(citizen);
+    }
+
+    private String getMilitaryRankCountryId(Citizen citizen) {
+        var countryMeta = citizen.getMetadata(MILITARY_RANK_COUNTRY_KEY);
+        if (countryMeta == null || countryMeta.getValue() == null)
+            return "";
+        return countryMeta.getValue().toString();
+    }
+
+    private String getCountryId(Citizen citizen) {
+        var country = citizen.getCountry();
+        return country != null ? country.getUuid().toString() : "";
     }
 
     // Faction permissions
